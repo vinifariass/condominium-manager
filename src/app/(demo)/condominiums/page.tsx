@@ -20,34 +20,224 @@ import {
 } from "lucide-react";
 
 export default function CondominiumsPage() {
-  // Dados simulados - substituir por dados reais da API
+  // Dados simulados baseados nos condomínios reais - substituir por dados reais da API
   const condominiums = [
     {
       id: 1,
-      name: "Residencial Jardim das Flores",
-      address: "Rua das Flores, 123 - Jardim América, São Paulo - SP",
-      cnpj: "12.345.678/0001-90",
-      phone: "(11) 3456-7890",
-      email: "administracao@jardimflores.com.br",
-      totalApartments: 120,
-      totalResidents: 285,
-      occupancyRate: 92,
-      monthlyRevenue: 145000,
+      name: "Condomínio Santos Dumont",
+      address: "Estrada dos Três Rios, 1306 - Freguesia - Jacarepaguá, RJ",
+      cnpj: "29.008.729/0001-96",
+      phone: "(21) 2443-7890",
+      email: "admin@santosdumont.com.br",
+      totalApartments: 85,
+      totalResidents: 198,
+      occupancyRate: 94,
+      monthlyRevenue: 125000,
       status: "Ativo",
-      manager: "Carlos Silva",
-      createdAt: "2020-03-15",
+      manager: "Carlos Santos",
+      createdAt: "2018-03-15",
       blocks: [
-        { name: "Bloco A", apartments: 40, floors: 10 },
-        { name: "Bloco B", apartments: 40, floors: 10 },
-        { name: "Bloco C", apartments: 40, floors: 10 }
+        { name: "Torre Principal", apartments: 85, floors: 20 }
       ],
       amenities: [
         "Salão de Festas",
         "Piscina",
         "Academia",
-        "Quadra de Tênis",
         "Playground",
-        "Churrasqueira"
+        "Portaria 24h"
+      ]
+    },
+    {
+      id: 2,
+      name: "Condomínio Griffe",
+      address: "Rua da Passagem, 160 - Botafogo, Rio de Janeiro - RJ",
+      cnpj: "14.473.420/0001-08",
+      phone: "(21) 2541-6789",
+      email: "admin@griffe.com.br",
+      totalApartments: 45,
+      totalResidents: 112,
+      occupancyRate: 87,
+      monthlyRevenue: 68000,
+      status: "Ativo",
+      manager: "Ana Paula Griffe",
+      createdAt: "2019-08-22",
+      blocks: [
+        { name: "Edifício Principal", apartments: 45, floors: 12 }
+      ],
+      amenities: [
+        "Portaria 24h",
+        "Área de Lazer",
+        "Estacionamento"
+      ]
+    },
+    {
+      id: 3,
+      name: "Condomínio Artagus",
+      address: "Rua Santa Clara, 142, Copacabana, Rio de Janeiro - RJ, CEP 22041-012",
+      cnpj: "04.543.049/0001-41",
+      phone: "(21) 2256-5432",
+      email: "admin@artagus.com.br",
+      totalApartments: 60,
+      totalResidents: 145,
+      occupancyRate: 91,
+      monthlyRevenue: 89000,
+      status: "Ativo",
+      manager: "Roberto Artagus",
+      createdAt: "2017-11-10",
+      blocks: [
+        { name: "Torre Única", apartments: 60, floors: 15 }
+      ],
+      amenities: [
+        "Piscina",
+        "Sauna",
+        "Portaria 24h",
+        "Área de Lazer"
+      ]
+    },
+    {
+      id: 4,
+      name: "Condomínio Cachoeira Dourada",
+      address: "Avenida Rainha Elizabeth, 122, CEP 22081-031, Rio de Janeiro - RJ",
+      cnpj: "73.383.614/0001-73",
+      phone: "(21) 2234-4321",
+      email: "admin@cachoeiraourada.com.br",
+      totalApartments: 75,
+      totalResidents: 180,
+      occupancyRate: 89,
+      monthlyRevenue: 95000,
+      status: "Ativo",
+      manager: "Maria Cachoeira",
+      createdAt: "2020-05-20",
+      blocks: [
+        { name: "Bloco Principal", apartments: 75, floors: 18 }
+      ],
+      amenities: [
+        "Piscina",
+        "Academia",
+        "Churrasqueira",
+        "Playground",
+        "Portaria 24h"
+      ]
+    },
+    {
+      id: 5,
+      name: "Condomínio Recanto",
+      address: "Rua Visconde de Silva, 85, Humaitá, CEP 22271-043, Rio de Janeiro - RJ",
+      cnpj: "37.541.791/0001-77",
+      phone: "(21) 2225-6789",
+      email: "admin@recanto.com.br",
+      totalApartments: 32,
+      totalResidents: 78,
+      occupancyRate: 95,
+      monthlyRevenue: 52000,
+      status: "Ativo",
+      manager: "João Recanto",
+      createdAt: "2021-01-15",
+      blocks: [
+        { name: "Edifício Único", apartments: 32, floors: 8 }
+      ],
+      amenities: [
+        "Área de Lazer",
+        "Portaria 24h",
+        "Jardim"
+      ]
+    },
+    {
+      id: 6,
+      name: "Condomínio Vivenda",
+      address: "Avenida Afrânio de Melo Franco, 74, Leblon, Rio de Janeiro - RJ",
+      cnpj: "39.937.662/0001-66",
+      phone: "(21) 2512-3456",
+      email: "admin@vivenda.com.br",
+      totalApartments: 95,
+      totalResidents: 220,
+      occupancyRate: 92,
+      monthlyRevenue: 145000,
+      status: "Ativo",
+      manager: "Fernanda Vivenda",
+      createdAt: "2018-09-10",
+      blocks: [
+        { name: "Torre A", apartments: 48, floors: 16 },
+        { name: "Torre B", apartments: 47, floors: 16 }
+      ],
+      amenities: [
+        "Piscina",
+        "Academia",
+        "Quadra Poliesportiva",
+        "Salão de Festas",
+        "Portaria 24h"
+      ]
+    },
+    {
+      id: 7,
+      name: "Condomínio OCAPORAN",
+      address: "Rua Rias da Rocha, 12, Copacabana, Rio de Janeiro - RJ",
+      cnpj: "68.768.027/0001-62",
+      phone: "(21) 2267-8901",
+      email: "admin@ocaporan.com.br",
+      totalApartments: 28,
+      totalResidents: 65,
+      occupancyRate: 88,
+      monthlyRevenue: 42000,
+      status: "Ativo",
+      manager: "Pedro Ocaporan",
+      createdAt: "2019-12-05",
+      blocks: [
+        { name: "Prédio Principal", apartments: 28, floors: 7 }
+      ],
+      amenities: [
+        "Portaria 24h",
+        "Terraço",
+        "Área de Lazer"
+      ]
+    },
+    {
+      id: 8,
+      name: "Condomínio Romeu",
+      address: "Rua Cinco de Julho, 266, Copacabana, Rio de Janeiro - RJ",
+      cnpj: "68.607.969/0001-69",
+      phone: "(21) 2255-7890",
+      email: "admin@romeu.com.br",
+      totalApartments: 52,
+      totalResidents: 125,
+      occupancyRate: 90,
+      monthlyRevenue: 73000,
+      status: "Ativo",
+      manager: "Luiza Romeu",
+      createdAt: "2020-03-18",
+      blocks: [
+        { name: "Edifício Principal", apartments: 52, floors: 13 }
+      ],
+      amenities: [
+        "Piscina",
+        "Área de Lazer",
+        "Portaria 24h",
+        "Estacionamento"
+      ]
+    },
+    {
+      id: 9,
+      name: "Condomínio Visconde Albuquerque",
+      address: "Avenida Visconde de Albuquerque, 392, Leblon, Rio de Janeiro - RJ",
+      cnpj: "12.307.108/0001-00",
+      phone: "(21) 2529-4567",
+      email: "admin@viscondalbuquerque.com.br",
+      totalApartments: 68,
+      totalResidents: 165,
+      occupancyRate: 93,
+      monthlyRevenue: 98000,
+      status: "Ativo",
+      manager: "Ricardo Albuquerque",
+      createdAt: "2019-07-22",
+      blocks: [
+        { name: "Torre Principal", apartments: 68, floors: 17 }
+      ],
+      amenities: [
+        "Piscina",
+        "Academia",
+        "Sauna",
+        "Salão de Festas",
+        "Portaria 24h"
       ]
     },
     {

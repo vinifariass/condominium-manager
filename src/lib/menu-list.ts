@@ -83,7 +83,7 @@ export function getMenuList(pathname: string): Group[] {
           icon: Calendar
         },
         {
-          href: "/amenities",
+          href: "/common-areas",
           label: "Áreas Comuns",
           icon: MapPin
         },

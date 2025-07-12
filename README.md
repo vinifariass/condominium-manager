@@ -1,104 +1,240 @@
-# [shadcn/ui sidebar](https://shadcn-ui-sidebar.salimi.my) &middot; [![Author Salimi](https://img.shields.io/badge/Author-Salimi-%3C%3E)](https://www.salimi.my)
+# 🏢 Sistema de Gestão Condominial
 
-A stunning and functional retractable sidebar for Next.js built on top of [shadcn/ui](https://ui.shadcn.com) complete with desktop and mobile responsiveness.
+Um sistema completo de gestão condominial desenvolvido em **Next.js 14** com **shadcn/ui**, oferecendo uma interface moderna e responsiva para administração de múltiplos condomínios.
 
-## Features
+## ✨ Características Principais
 
-- Retractable mini and wide sidebar
-- Scrollable sidebar menu
-- Sheet menu for mobile
-- Grouped menu with labels
-- Collapsible submenu
-- Extracted menu items list
+- 🏢 **Multi-tenant**: Suporte a múltiplos condomínios
+- 📱 **Responsivo**: Interface adaptável para desktop, tablet e mobile
+- 🌙 **Tema**: Suporte a modo claro e escuro
+- ⚡ **Performance**: Next.js 14 com App Router
+- 🎨 **Design System**: shadcn/ui com Tailwind CSS
+- 🔐 **Segurança**: Arquitetura preparada para autenticação
+- ♿ **Acessibilidade**: Componentes totalmente acessíveis
 
-## Tech/framework used
+## 🎯 Funcionalidades
 
-- Next.js 14
-- Shadcn/ui
-- Tailwind CSS
-- TypeScript
-- Zustand
+### 📊 Dashboard
+- Métricas em tempo real
+- Gráficos financeiros
+- Atividades recentes
+- Próximas reservas
 
-## Installation
+### 🏠 Gestão de Apartamentos
+- Lista completa com filtros
+- Detalhes de cada unidade
+- Status de ocupação
+- Histórico de alterações
 
-### Custom registry
+### 👥 Gestão de Moradores
+- Cadastro completo
+- Relacionamento com apartamentos
+- Tipos: proprietário, locatário, dependente
+- Dados de contato e documentos
 
-If you are using @shadcn/ui 2.0.0 or later, you can install the component directly from the registry.
+### 📅 Sistema de Reservas
+- Áreas comuns disponíveis
+- Calendário de disponibilidade
+- Confirmação automática
+- Histórico de reservas
 
-```bash
-npx shadcn@latest add https://raw.githubusercontent.com/salimi-my/shadcn-ui-sidebar/refs/heads/master/public/registry/shadcn-sidebar.json
+### 💰 Controle Financeiro
+- Contas a receber/pagar
+- Fluxo de caixa detalhado
+- Categorização de despesas
+- Relatórios financeiros
 
-or
+### 👨‍💼 Gestão de Funcionários
+- Cadastro com dados pessoais
+- Cargos e salários
+- Benefícios e documentos
+- Controle de ponto
 
-npx shadcn@latest add https://shadcn-ui-sidebar.salimi.my/registry/shadcn-sidebar.json
-```
+### 🎫 Sistema de Chamados
+- Abertura de tickets
+- Categorização por tipo
+- Priorização e status
+- Histórico completo
 
-### Usage example for Nextjs
-```tsx
-//layout.tsx
-import AdminPanelLayout from "@/components/admin-panel/admin-panel-layout";
+## 🛠 Tecnologias
 
-export default async function Layout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return <AdminPanelLayout>{children}</AdminPanelLayout>;
-}
+| Tecnologia | Versão | Descrição |
+|-----------|--------|-----------|
+| Next.js | 14 | Framework React com App Router |
+| TypeScript | 5 | Tipagem estática |
+| Tailwind CSS | 3.4 | Framework CSS utilitário |
+| shadcn/ui | Latest | Biblioteca de componentes |
+| Lucide React | Latest | Ícones modernos |
+| Radix UI | Latest | Primitivos acessíveis |
 
-//page.tsx
-import { ContentLayout } from "@/components/admin-panel/content-layout";
+## 🚀 Início Rápido
 
-export default function Page() {
-  return (
-    <ContentLayout title="Test">
-      <div>Test</div>
-    </ContentLayout>
-  );
-}
-```
+### Pré-requisitos
+- Node.js 18.17+
+- npm, yarn ou pnpm
+- Git
 
-## Starting the project locally
+### Instalação
 
-1. Clone the repository
-
+1. **Clone o repositório**
    ```bash
-   git clone https://github.com/salimi-my/shadcn-ui-sidebar
+   git clone [repository-url]
+   cd shadcn-ui-sidebar
    ```
 
-2. Install dependencies
-
+2. **Instale as dependências**
    ```bash
-   cd shadcn-ui-sidebar
    npm install
    ```
 
-3. Run the development server
-
+3. **Execute o projeto**
    ```bash
    npm run dev
    ```
 
-## Demo
+4. **Acesse o sistema**
+   ```
+   http://localhost:3000
+   ```
 
-The app is hosted on Vercel. [Click here](https://shadcn-ui-sidebar.salimi.my) to visit.
-<br>
-Direct demo link: `https://shadcn-ui-sidebar.salimi.my`
+## 📁 Estrutura do Projeto
 
-## Screenshots
+```
+src/
+├── app/                    # App Router
+│   ├── (demo)/            # Rotas protegidas
+│   │   ├── dashboard/     # Dashboard principal
+│   │   ├── apartments/    # Apartamentos
+│   │   ├── residents/     # Moradores
+│   │   ├── reservations/  # Reservas
+│   │   ├── financials/    # Financeiro
+│   │   ├── employees/     # Funcionários
+│   │   └── tickets/       # Chamados
+│   ├── login/             # Login
+│   └── globals.css        # Estilos globais
+├── components/            # Componentes React
+│   ├── admin-panel/       # Layout e navegação
+│   └── ui/               # Componentes shadcn/ui
+├── hooks/                # Hooks customizados
+└── lib/                  # Utilitários
+```
 
-#### Light mode
+## 🎨 Screenshots
 
-![Light mode](/screenshots/screenshot-1.png)
+### Dashboard
+![Dashboard](public/demo-light-min.png)
 
-#### Dark mode
+### Modo Escuro
+![Dark Mode](public/demo-dark-min.png)
 
-![Dark mode](/screenshots/screenshot-2.png)
+### Mobile
+![Mobile](public/demo-mobile-light-min.png)
 
-#### Mini sidebar
+## 📱 Responsividade
 
-![Mini sidebar](/screenshots/screenshot-3.png)
+O sistema é totalmente responsivo com diferentes layouts para:
 
-#### Sheet menu
+- **Desktop**: Layout completo com sidebar fixa
+- **Tablet**: Sidebar colapsável
+- **Mobile**: Menu hambúrguer otimizado
 
-<img src="/screenshots/screenshot-4.png" width="300">
+## 🔧 Personalização
+
+### Temas
+Edite as variáveis CSS em `src/app/globals.css`:
+
+```css
+:root {
+  --primary: 210 40% 58%;
+  --secondary: 210 40% 96%;
+  /* ... outras variáveis */
+}
+```
+
+### Adicionando Páginas
+1. Crie em `src/app/(demo)/[nome]/page.tsx`
+2. Adicione no menu em `src/lib/menu-list.ts`
+3. Siga os padrões existentes
+
+### Componentes shadcn/ui
+```bash
+npx shadcn-ui@latest add [component-name]
+```
+
+## 🏗 Arquitetura Multi-tenant
+
+O sistema suporta múltiplos condomínios com:
+
+- **Isolamento de dados**: Cada condomínio tem seus próprios dados
+- **Customizações**: Configurações específicas por tenant
+- **Domínios**: Suporte a subdomínios ou domínios dedicados
+- **Escalabilidade**: Arquitetura preparada para crescimento
+
+## 🔮 Próximos Passos
+
+### Backend
+- [ ] API Routes com Next.js
+- [ ] Banco de dados (PostgreSQL)
+- [ ] Autenticação (NextAuth.js)
+- [ ] Middleware multi-tenant
+
+### Funcionalidades
+- [ ] Sistema de notificações
+- [ ] Relatórios em PDF
+- [ ] Upload de documentos
+- [ ] Chat em tempo real
+- [ ] App mobile
+
+## 📚 Documentação
+
+- **[Documentação Completa](DOCUMENTATION_COMPLETE.md)**: Guia detalhado
+- **[shadcn/ui](https://ui.shadcn.com/)**: Biblioteca de componentes
+- **[Next.js 14](https://nextjs.org/docs)**: Framework React
+- **[Tailwind CSS](https://tailwindcss.com/docs)**: CSS utilitário
+
+## 🤝 Contribuição
+
+1. Fork o projeto
+2. Crie uma branch feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+## 📄 Scripts
+
+```bash
+npm run dev          # Desenvolvimento
+npm run build        # Build de produção
+npm run start        # Servidor de produção
+npm run lint         # Linting
+npm run type-check   # Verificação de tipos
+```
+
+## 📊 Status do Projeto
+
+- ✅ **Interface**: Completa e responsiva
+- ✅ **Componentes**: shadcn/ui integrados
+- ✅ **Páginas**: Todas as principais criadas
+- ✅ **Dados**: Exemplos realistas
+- 🔄 **Backend**: Em desenvolvimento
+- 🔄 **Autenticação**: Planejada
+- 🔄 **API**: Em desenvolvimento
+
+## 📝 Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para detalhes.
+
+---
+
+## 👨‍💻 Desenvolvido por
+
+**Sistema criado com ❤️ para modernizar a gestão condominial**
+
+Para dúvidas ou suporte:
+- 📧 Entre em contato via Issues
+- 📖 Consulte a [documentação completa](DOCUMENTATION_COMPLETE.md)
+- 🐛 Reporte bugs via Issues do GitHub
+
+---
+
+*Última atualização: Dezembro 2024*
