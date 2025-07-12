@@ -1,10 +1,19 @@
 import {
-  Tag,
-  Users,
-  Settings,
-  Bookmark,
-  SquarePen,
   LayoutGrid,
+  Building2,
+  Users,
+  Key,
+  UserCheck,
+  Calendar,
+  DollarSign,
+  FileText,
+  HeadphonesIcon,
+  Bell,
+  Settings,
+  CreditCard,
+  BarChart3,
+  MapPin,
+  Wrench,
   LucideIcon
 } from "lucide-react";
 
@@ -41,47 +50,111 @@ export function getMenuList(pathname: string): Group[] {
       ]
     },
     {
-      groupLabel: "Contents",
+      groupLabel: "Gestão",
       menus: [
         {
-          href: "",
-          label: "Posts",
-          icon: SquarePen,
-          submenus: [
-            {
-              href: "/posts",
-              label: "All Posts"
-            },
-            {
-              href: "/posts/new",
-              label: "New Post"
-            }
-          ]
+          href: "/condominiums",
+          label: "Condomínios",
+          icon: Building2
         },
         {
-          href: "/categories",
-          label: "Categories",
-          icon: Bookmark
+          href: "/apartments",
+          label: "Apartamentos", 
+          icon: Key
         },
         {
-          href: "/tags",
-          label: "Tags",
-          icon: Tag
+          href: "/residents",
+          label: "Moradores",
+          icon: Users
+        },
+        {
+          href: "/employees",
+          label: "Funcionários",
+          icon: UserCheck
         }
       ]
     },
     {
-      groupLabel: "Settings",
+      groupLabel: "Operações",
       menus: [
         {
-          href: "/users",
-          label: "Users",
-          icon: Users
+          href: "/reservations",
+          label: "Reservas",
+          icon: Calendar
         },
         {
-          href: "/account",
-          label: "Account",
+          href: "/amenities",
+          label: "Áreas Comuns",
+          icon: MapPin
+        },
+        {
+          href: "/maintenance",
+          label: "Manutenção",
+          icon: Wrench
+        },
+        {
+          href: "/tickets",
+          label: "Chamados",
+          icon: HeadphonesIcon
+        }
+      ]
+    },
+    {
+      groupLabel: "Financeiro",
+      menus: [
+        {
+          href: "/financials",
+          label: "Financeiro",
+          icon: DollarSign,
+          submenus: [
+            {
+              href: "/financials/income",
+              label: "Receitas"
+            },
+            {
+              href: "/financials/expenses",
+              label: "Despesas"
+            },
+            {
+              href: "/financials/fees",
+              label: "Taxas Condominiais"
+            }
+          ]
+        },
+        {
+          href: "/reports",
+          label: "Relatórios",
+          icon: BarChart3
+        }
+      ]
+    },
+    {
+      groupLabel: "Comunicação",
+      menus: [
+        {
+          href: "/notices",
+          label: "Avisos",
+          icon: FileText
+        },
+        {
+          href: "/notifications",
+          label: "Notificações",
+          icon: Bell
+        }
+      ]
+    },
+    {
+      groupLabel: "Sistema",
+      menus: [
+        {
+          href: "/settings",
+          label: "Configurações",
           icon: Settings
+        },
+        {
+          href: "/cards",
+          label: "Cards",
+          icon: CreditCard
         }
       ]
     }

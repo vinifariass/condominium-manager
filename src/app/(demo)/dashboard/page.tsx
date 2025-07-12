@@ -1,78 +1,246 @@
-"use client";
-import Link from "next/link";
 import { ContentLayout } from "@/components/admin-panel/content-layout";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator
-} from "@/components/ui/breadcrumb";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger
-} from "@/components/ui/tooltip";
-import { useSidebar } from "@/hooks/use-sidebar";
-import { useStore } from "@/hooks/use-store";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { 
+  Building2, 
+  Users, 
+  Key, 
+  DollarSign, 
+  AlertTriangle, 
+  Calendar,
+  TrendingUp,
+  TrendingDown,
+  Activity
+} from "lucide-react";
 
 export default function DashboardPage() {
-  const sidebar = useStore(useSidebar, (x) => x);
-  if (!sidebar) return null;
-  const { settings, setSettings } = sidebar;
+  // Dados simulados - substituir por dados reais da API
+  const stats = {
+    totalApartments: 120,
+    totalResidents: 285,
+    occupancyRate: 92,
+    monthlyRevenue: 145000,
+    pendingTickets: 8,
+    upcomingReservations: 12
+  };
+
+  const recentActivities = [
+    {
+      id: 1,
+      type: "reservation",
+      description: "Nova reserva do salão de festas",
+      user: "Maria Silva - Apt 201",
+      time: "2 horas atrás"
+    },
+    {
+      id: 2,
+      type: "ticket",
+      description: "Chamado de manutenção no elevador",
+      user: "João Santos - Apt 105",
+      time: "4 horas atrás"
+    },
+    {
+      id: 3,
+      type: "payment",
+      description: "Pagamento de taxa condominial",
+      user: "Ana Costa - Apt 302",
+      time: "6 horas atrás"
+    }
+  ];
+
   return (
     <ContentLayout title="Dashboard">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link href="/">Home</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Dashboard</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-      <TooltipProvider>
-        <div className="flex gap-6 mt-6">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="is-hover-open"
-                  onCheckedChange={(x) => setSettings({ isHoverOpen: x })}
-                  checked={settings.isHoverOpen}
-                />
-                <Label htmlFor="is-hover-open">Hover Open</Label>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>When hovering on the sidebar in mini state, it will open</p>
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="disable-sidebar"
-                  onCheckedChange={(x) => setSettings({ disabled: x })}
-                  checked={settings.disabled}
-                />
-                <Label htmlFor="disable-sidebar">Disable Sidebar</Label>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Hide sidebar</p>
-            </TooltipContent>
-          </Tooltip>
+      <div className="space-y-6">
+        {/* Cards de Estatísticas */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total de Apartamentos</CardTitle>
+              <Key className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalApartments}</div>
+              <p className="text-xs text-muted-foreground">
+                {stats.occupancyRate}% ocupados
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total de Moradores</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalResidents}</div>
+              <p className="text-xs text-muted-foreground">
+                +12 este mês
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Receita Mensal</CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">R$ {stats.monthlyRevenue.toLocaleString()}</div>
+              <p className="text-xs text-green-600 flex items-center">
+                <TrendingUp className="h-3 w-3 mr-1" />
+                +8.2% em relação ao mês anterior
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Chamados Pendentes</CardTitle>
+              <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.pendingTickets}</div>
+              <p className="text-xs text-red-600 flex items-center">
+                <TrendingDown className="h-3 w-3 mr-1" />
+                -3 desde ontem
+              </p>
+            </CardContent>
+          </Card>
         </div>
-      </TooltipProvider>
+
+        {/* Gráficos e Resumos */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Resumo Financeiro */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Resumo Financeiro</CardTitle>
+              <CardDescription>Últimos 6 meses</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Receitas</span>
+                  <span className="font-medium text-green-600">R$ 145.000</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Despesas</span>
+                  <span className="font-medium text-red-600">R$ 89.500</span>
+                </div>
+                <div className="flex items-center justify-between border-t pt-2">
+                  <span className="font-medium">Saldo</span>
+                  <span className="font-bold text-green-600">R$ 55.500</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Ocupação por Bloco */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Ocupação por Bloco</CardTitle>
+              <CardDescription>Status atual dos apartamentos</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Bloco A</span>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-20 bg-secondary rounded-full h-2">
+                      <div className="bg-primary h-2 rounded-full" style={{ width: '95%' }}></div>
+                    </div>
+                    <span className="text-sm font-medium">95%</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Bloco B</span>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-20 bg-secondary rounded-full h-2">
+                      <div className="bg-primary h-2 rounded-full" style={{ width: '88%' }}></div>
+                    </div>
+                    <span className="text-sm font-medium">88%</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Bloco C</span>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-20 bg-secondary rounded-full h-2">
+                      <div className="bg-primary h-2 rounded-full" style={{ width: '92%' }}></div>
+                    </div>
+                    <span className="text-sm font-medium">92%</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Atividades Recentes */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Activity className="h-5 w-5" />
+              <span>Atividades Recentes</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentActivities.map((activity) => (
+                <div key={activity.id} className="flex items-center space-x-4 p-3 border rounded-lg">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{activity.description}</p>
+                    <p className="text-xs text-muted-foreground">{activity.user}</p>
+                  </div>
+                  <span className="text-xs text-muted-foreground">{activity.time}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Próximas Reservas */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Calendar className="h-5 w-5" />
+              <span>Próximas Reservas</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium">Salão de Festas</p>
+                  <p className="text-sm text-muted-foreground">Maria Silva - Apt 201</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-medium">Hoje</p>
+                  <p className="text-xs text-muted-foreground">19:00 - 23:00</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium">Quadra de Tênis</p>
+                  <p className="text-sm text-muted-foreground">João Santos - Apt 105</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-medium">Amanhã</p>
+                  <p className="text-xs text-muted-foreground">08:00 - 10:00</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium">Churrasqueira</p>
+                  <p className="text-sm text-muted-foreground">Ana Costa - Apt 302</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-medium">Sábado</p>
+                  <p className="text-xs text-muted-foreground">12:00 - 18:00</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </ContentLayout>
   );
 }
