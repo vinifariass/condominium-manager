@@ -1,5 +1,9 @@
+"use client";
+
 import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 import { 
   Building2, 
   Users, 
@@ -13,6 +17,8 @@ import {
 } from "lucide-react";
 
 export default function DashboardPage() {
+  const router = useRouter();
+  
   // Dados simulados - substituir por dados reais da API
   const stats = {
     totalApartments: 120,
@@ -200,10 +206,23 @@ export default function DashboardPage() {
         {/* Próximas Reservas */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Calendar className="h-5 w-5" />
-              <span>Próximas Reservas</span>
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center space-x-2">
+                <Calendar className="h-5 w-5" />
+                <span>Próximas Reservas</span>
+              </CardTitle>
+              <Button 
+                variant="default"
+                size="sm"
+                className="flex items-center space-x-2"
+                onClick={() => {
+                  router.push('/reservations');
+                }}
+              >
+                <Calendar className="h-4 w-4" />
+                <span>Ver Calendário</span>
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">

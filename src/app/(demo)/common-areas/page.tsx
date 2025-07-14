@@ -1,3 +1,6 @@
+"use client";
+
+import React, { useState } from "react";
 import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,12 +24,378 @@ import {
   Car,
   Gamepad2,
   Coffee,
-  Baby
+  Baby,
+  X,
+  Save,
+  CalendarDays
 } from "lucide-react";
 
+// Interface para área comum
+interface CommonArea {
+  id: number;
+  name: string;
+  condominium: string;
+  condominiumId: number;
+  type: string;
+  capacity: number;
+  hourlyRate: number;
+  minimumHours: number;
+  maxAdvanceBooking: number;
+  status: string;
+  amenities: string[];
+  rules: string[];
+  availability: string;
+  lastMaintenance: string;
+  nextMaintenance: string;
+  description: string;
+  icon: any;
+}
+
+// Modal para editar área comum
+const EditAreaModal = ({ 
+  isOpen, 
+  onClose, 
+  area, 
+  onSave 
+}: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  area: CommonArea | null;
+  onSave: (updatedArea: CommonArea) => void;
+}) => {
+  const [formData, setFormData] = useState<CommonArea | null>(area);
+
+  React.useEffect(() => {
+    setFormData(area);
+  }, [area]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (formData) {
+      onSave(formData);
+      onClose();
+    }
+  };
+
+  if (!isOpen || !formData) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-background border rounded-lg shadow-lg w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-6 border-b">
+          <h2 className="text-lg font-semibold">Editar Área Comum</h2>
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium">Nome da Área</label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background"
+                required
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Tipo</label>
+              <select
+                value={formData.type}
+                onChange={(e) => setFormData({...formData, type: e.target.value})}
+                className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background"
+                required
+              >
+                <option value="Festa">Festa</option>
+                <option value="Esporte">Esporte</option>
+                <option value="Lazer">Lazer</option>
+                <option value="Fitness">Fitness</option>
+                <option value="Infantil">Infantil</option>
+                <option value="Estacionamento">Estacionamento</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="text-sm font-medium">Capacidade</label>
+              <input
+                type="number"
+                value={formData.capacity}
+                onChange={(e) => setFormData({...formData, capacity: parseInt(e.target.value)})}
+                className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background"
+                required
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Valor por Hora (R$)</label>
+              <input
+                type="number"
+                step="0.01"
+                value={formData.hourlyRate}
+                onChange={(e) => setFormData({...formData, hourlyRate: parseFloat(e.target.value)})}
+                className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background"
+                required
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Horas Mínimas</label>
+              <input
+                type="number"
+                value={formData.minimumHours}
+                onChange={(e) => setFormData({...formData, minimumHours: parseInt(e.target.value)})}
+                className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background"
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium">Status</label>
+            <select
+              value={formData.status}
+              onChange={(e) => setFormData({...formData, status: e.target.value})}
+              className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background"
+              required
+            >
+              <option value="Disponível">Disponível</option>
+              <option value="Ocupado">Ocupado</option>
+              <option value="Em Manutenção">Em Manutenção</option>
+              <option value="Indisponível">Indisponível</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium">Descrição</label>
+            <textarea
+              value={formData.description}
+              onChange={(e) => setFormData({...formData, description: e.target.value})}
+              className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background"
+              rows={3}
+            />
+          </div>
+
+          <div>
+            <label className="text-sm font-medium">Horário de Funcionamento</label>
+            <input
+              type="text"
+              value={formData.availability}
+              onChange={(e) => setFormData({...formData, availability: e.target.value})}
+              className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background"
+              placeholder="Ex: Todos os dias, 8h às 22h"
+            />
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <Button type="button" variant="outline" onClick={onClose} className="flex-1">
+              Cancelar
+            </Button>
+            <Button type="submit" className="flex-1">
+              <Save className="h-4 w-4 mr-2" />
+              Salvar Alterações
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// Modal para reservar área comum
+const ReserveAreaModal = ({ 
+  isOpen, 
+  onClose, 
+  area 
+}: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  area: CommonArea | null;
+}) => {
+  const [formData, setFormData] = useState({
+    date: "",
+    startTime: "",
+    endTime: "",
+    resident: "",
+    apartment: "",
+    block: "",
+    phone: "",
+    notes: "",
+    estimatedGuests: 1
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Aqui você implementaria a lógica para salvar a reserva
+    console.log("Nova reserva:", { area: area?.name, ...formData });
+    onClose();
+  };
+
+  const calculateTotal = () => {
+    if (!area || !formData.startTime || !formData.endTime) return 0;
+    
+    const start = new Date(`2000-01-01 ${formData.startTime}`);
+    const end = new Date(`2000-01-01 ${formData.endTime}`);
+    const hours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+    
+    return Math.max(hours, area.minimumHours) * area.hourlyRate;
+  };
+
+  if (!isOpen || !area) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-background border rounded-lg shadow-lg w-full max-w-md mx-4">
+        <div className="flex items-center justify-between p-6 border-b">
+          <h2 className="text-lg font-semibold">Reservar: {area.name}</h2>
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div>
+            <label className="text-sm font-medium">Data da Reserva</label>
+            <input
+              type="date"
+              value={formData.date}
+              onChange={(e) => setFormData({...formData, date: e.target.value})}
+              className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background"
+              required
+              min={new Date().toISOString().split('T')[0]}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium">Hora Início</label>
+              <input
+                type="time"
+                value={formData.startTime}
+                onChange={(e) => setFormData({...formData, startTime: e.target.value})}
+                className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background"
+                required
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Hora Fim</label>
+              <input
+                type="time"
+                value={formData.endTime}
+                onChange={(e) => setFormData({...formData, endTime: e.target.value})}
+                className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background"
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium">Nome do Solicitante</label>
+            <input
+              type="text"
+              value={formData.resident}
+              onChange={(e) => setFormData({...formData, resident: e.target.value})}
+              className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background"
+              required
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium">Apartamento</label>
+              <input
+                type="text"
+                value={formData.apartment}
+                onChange={(e) => setFormData({...formData, apartment: e.target.value})}
+                className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background"
+                required
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Bloco</label>
+              <input
+                type="text"
+                value={formData.block}
+                onChange={(e) => setFormData({...formData, block: e.target.value})}
+                className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background"
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium">Telefone</label>
+            <input
+              type="tel"
+              value={formData.phone}
+              onChange={(e) => setFormData({...formData, phone: e.target.value})}
+              className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="text-sm font-medium">Número Estimado de Pessoas</label>
+            <input
+              type="number"
+              value={formData.estimatedGuests}
+              onChange={(e) => setFormData({...formData, estimatedGuests: parseInt(e.target.value)})}
+              className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background"
+              required
+              min="1"
+              max={area.capacity}
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Capacidade máxima: {area.capacity} pessoas
+            </p>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium">Observações</label>
+            <textarea
+              value={formData.notes}
+              onChange={(e) => setFormData({...formData, notes: e.target.value})}
+              className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background"
+              rows={3}
+            />
+          </div>
+
+          {area.hourlyRate > 0 && (
+            <div className="p-3 bg-muted rounded-md">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">Valor Total:</span>
+                <span className="text-lg font-bold text-primary">
+                  R$ {calculateTotal().toFixed(2)}
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Mínimo {area.minimumHours}h • R$ {area.hourlyRate.toFixed(2)}/hora
+              </p>
+            </div>
+          )}
+
+          <div className="flex gap-3 pt-4">
+            <Button type="button" variant="outline" onClick={onClose} className="flex-1">
+              Cancelar
+            </Button>
+            <Button type="submit" className="flex-1">
+              <CalendarDays className="h-4 w-4 mr-2" />
+              Confirmar Reserva
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 export default function CommonAreasPage() {
-  // Dados simulados de áreas comuns
-  const commonAreas = [
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isReserveModalOpen, setIsReserveModalOpen] = useState(false);
+  const [selectedArea, setSelectedArea] = useState<CommonArea | null>(null);
+  const [commonAreas, setCommonAreas] = useState<CommonArea[]>([
     {
       id: 1,
       name: "Salão de Festas Principal",
@@ -219,7 +588,30 @@ export default function CommonAreasPage() {
       description: "Estacionamento coberto para visitantes",
       icon: Car
     }
-  ];
+  ]);
+
+  // Funções para gerenciar os modais
+  const handleEditArea = (area: CommonArea) => {
+    setSelectedArea(area);
+    setIsEditModalOpen(true);
+  };
+
+  const handleReserveArea = (area: CommonArea) => {
+    setSelectedArea(area);
+    setIsReserveModalOpen(true);
+  };
+
+  const handleSaveArea = (updatedArea: CommonArea) => {
+    setCommonAreas(areas => 
+      areas.map(area => area.id === updatedArea.id ? updatedArea : area)
+    );
+  };
+
+  const handleCloseModals = () => {
+    setIsEditModalOpen(false);
+    setIsReserveModalOpen(false);
+    setSelectedArea(null);
+  };
 
   // Função para obter cor do status
   const getStatusColor = (status: string) => {
@@ -466,7 +858,13 @@ export default function CommonAreasPage() {
 
                     {/* Ações */}
                     <div className="flex items-center gap-2 mt-4 lg:mt-0 lg:ml-4">
-                      <Button variant="outline" size="sm" className="flex items-center gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex items-center gap-2"
+                        onClick={() => handleReserveArea(area)}
+                        disabled={area.status !== "Disponível"}
+                      >
                         <Calendar className="h-4 w-4" />
                         Reservar
                       </Button>
@@ -474,7 +872,12 @@ export default function CommonAreasPage() {
                         <Eye className="h-4 w-4" />
                         Ver
                       </Button>
-                      <Button variant="outline" size="sm" className="flex items-center gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex items-center gap-2"
+                        onClick={() => handleEditArea(area)}
+                      >
                         <Edit className="h-4 w-4" />
                         Editar
                       </Button>
@@ -489,6 +892,19 @@ export default function CommonAreasPage() {
           </CardContent>
         </Card>
       </div>
+      
+      {/* Modals */}
+      <EditAreaModal 
+        isOpen={isEditModalOpen}
+        onClose={handleCloseModals}
+        area={selectedArea}
+        onSave={handleSaveArea}
+      />
+      <ReserveAreaModal 
+        isOpen={isReserveModalOpen}
+        onClose={handleCloseModals}
+        area={selectedArea}
+      />
     </ContentLayout>
   );
 }
