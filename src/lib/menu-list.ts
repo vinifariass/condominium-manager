@@ -15,7 +15,8 @@ import {
   MapPin,
   Wrench,
   LucideIcon,
-  HelpCircle
+  HelpCircle,
+  Calculator
 } from "lucide-react";
 
 type Submenu = {
@@ -161,6 +162,11 @@ export function getMenuList(pathname: string): Group[] {
           href: "/help",
           label: "Como usar",
           icon: HelpCircle
+        },
+        {
+          href: "/pricing",
+          label: "Planos e Preços",
+          icon: Calculator
         },
         {
           href: "/cards",
