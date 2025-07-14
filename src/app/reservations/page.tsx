@@ -22,8 +22,10 @@ import {
   ChevronRight,
   List,
   CalendarIcon,
-  X
+  X,
+  MessageSquare
 } from "lucide-react";
+import { notificationService } from "@/lib/notification-service";
 
 // Componente Modal para nova reserva
 const NewReservationModal = ({ 
@@ -56,11 +58,48 @@ const NewReservationModal = ({
     "Playground"
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Aqui você implementaria a lógica para salvar a reserva
-    console.log("Nova reserva:", formData);
-    onClose();
+    
+    try {
+      // Aqui você implementaria a lógica para salvar a reserva no backend
+      console.log("Nova reserva:", formData);
+      
+      // Enviar notificação de confirmação da reserva por WhatsApp/SMS
+      if (formData.phone && formData.resident && formData.amenity) {
+        const reservationDate = selectedDate?.toLocaleDateString('pt-BR') || '';
+        
+        await notificationService.sendNotification({
+          template: {
+            id: 'reservation_confirmation',
+            name: 'Confirmação de Reserva',
+            sms: `Reserva confirmada! ${formData.amenity} em ${reservationDate} das ${formData.startTime} às ${formData.endTime}.`,
+            whatsapp: `✅ *Reserva Confirmada*\n\n📍 Área: ${formData.amenity}\n📅 Data: ${reservationDate}\n🕐 Horário: ${formData.startTime} às ${formData.endTime}\n\nLembre-se de seguir as regras de uso!\n\nCondomínio`,
+            variables: ['area', 'date', 'start_time', 'end_time']
+          },
+          recipients: [{
+            name: formData.resident,
+            phone: formData.phone,
+            apartment: formData.apartment,
+            preferredMethod: 'whatsapp'
+          }],
+          variables: {
+            area: formData.amenity,
+            date: reservationDate,
+            start_time: formData.startTime,
+            end_time: formData.endTime
+          },
+          priority: 'medium'
+        });
+        
+        console.log("Notificação de confirmação enviada!");
+      }
+      
+      onClose();
+    } catch (error) {
+      console.error("Erro ao criar reserva:", error);
+      // Aqui você pode adicionar uma notificação de erro para o usuário
+    }
   };
 
   if (!isOpen) return null;
