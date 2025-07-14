@@ -5,6 +5,7 @@ import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import CheckoutModal from "@/components/checkout-modal";
 import { 
   DollarSign,
   Check,
@@ -53,6 +54,8 @@ interface PricingPlan {
 export default function PricingPage() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
+  const [checkoutPlan, setCheckoutPlan] = useState<PricingPlan | null>(null);
 
   const plans: PricingPlan[] = [
     {
@@ -219,6 +222,11 @@ export default function PricingPage() {
     return billingCycle === 'monthly' ? plan.monthlyPrice : Math.round(plan.yearlyPrice / 12);
   };
 
+  const handleChoosePlan = (plan: PricingPlan) => {
+    setCheckoutPlan(plan);
+    setCheckoutModalOpen(true);
+  };
+
   return (
     <ContentLayout title="Planos e Preços">
       <div className="space-y-8">
@@ -230,7 +238,7 @@ export default function PricingPage() {
           </p>
           
           {/* Billing Cycle Toggle */}
-          <div className="flex items-center justify-center gap-2 mt-8 mb-4">
+          <div className="flex items-center justify-center gap-2 mt-8 mb-8 lg:mb-12">
             <span className={billingCycle === 'monthly' ? 'font-medium text-foreground' : 'text-muted-foreground'}>
               Mensal
             </span>
@@ -258,7 +266,7 @@ export default function PricingPage() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-4">
           {plans.map((plan) => {
             const IconComponent = plan.icon;
             const savings = calculateSavings(plan);
@@ -269,18 +277,18 @@ export default function PricingPage() {
                 key={plan.id}
                 className={`relative ${plan.color} ${
                   plan.popular ? 'border-2 border-primary shadow-lg scale-105' : ''
-                }`}
+                } ${plan.popular ? 'mt-6' : 'mt-2'}`}
               >
                 {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
-                    <Badge className="bg-primary text-primary-foreground px-4 py-1.5 flex items-center gap-1 shadow-lg">
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-20">
+                    <Badge className="bg-primary text-primary-foreground px-4 py-1.5 flex items-center gap-1 shadow-lg whitespace-nowrap">
                       <Sparkles className="h-3 w-3" />
                       Mais Popular
                     </Badge>
                   </div>
                 )}
                 
-                <CardHeader className={`text-center ${plan.popular ? 'pt-8' : 'pt-6'} pb-4`}>
+                <CardHeader className={`text-center ${plan.popular ? 'pt-10' : 'pt-6'} pb-4`}>
                   <div className="flex justify-center mb-4">
                     <div className="p-3 bg-white dark:bg-gray-800 rounded-full shadow-sm border border-gray-100 dark:border-gray-700">
                       <IconComponent className="h-8 w-8 text-primary" />
@@ -336,7 +344,7 @@ export default function PricingPage() {
                   <Button 
                     className={`w-full ${plan.popular ? 'bg-primary hover:bg-primary/90 text-primary-foreground' : ''}`}
                     variant={plan.popular ? "default" : "outline"}
-                    onClick={() => setSelectedPlan(plan.id)}
+                    onClick={() => handleChoosePlan(plan)}
                   >
                     {selectedPlan === plan.id ? 'Selecionado ✓' : 'Escolher Plano'}
                   </Button>
@@ -595,6 +603,14 @@ export default function PricingPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Modal de Checkout */}
+      <CheckoutModal
+        isOpen={checkoutModalOpen}
+        onClose={() => setCheckoutModalOpen(false)}
+        plan={checkoutPlan}
+        billingCycle={billingCycle}
+      />
     </ContentLayout>
   );
 }
