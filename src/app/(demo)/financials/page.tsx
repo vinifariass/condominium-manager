@@ -1,6 +1,15 @@
+"use client";
+
 import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { 
   DollarSign, 
   Plus, 
@@ -15,11 +24,136 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
-  XCircle
+  XCircle,
+  ChevronDown,
+  Edit,
+  Trash2,
+  Eye,
+  Copy
 } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { 
+  getFinancials, 
+  getFinancialStats, 
+  FINANCIAL_FILTER_OPTIONS,
+  type FinancialData,
+  type FinancialFilters 
+} from "@/lib/actions/financial.actions";
 
 export default function FinancialsPage() {
-  // Dados simulados - substituir por dados reais da API
+  // Estados para filtros e dados
+  const [financials, setFinancials] = useState<FinancialData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [filters, setFilters] = useState<FinancialFilters>({});
+  const [showFilters, setShowFilters] = useState(false);
+  
+  // Estados para modais
+  const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  
+  const [stats, setStats] = useState({
+    totalReceita: 0,
+    totalDespesa: 0,
+    saldo: 0,
+    receitasPendentes: 0,
+    despesasPendentes: 0,
+    receitasAtrasadas: 0,
+    despesasAtrasadas: 0,
+    projecaoMensal: 0
+  });
+
+  // Carregar dados
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        const [financialData, financialStats] = await Promise.all([
+          getFinancials(filters),
+          getFinancialStats()
+        ]);
+        setFinancials(financialData.financials);
+        setStats(financialStats);
+      } catch (error) {
+        console.error('Erro ao carregar dados financeiros:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, [filters]);
+
+  // Função para atualizar filtros
+  const updateFilter = (key: keyof FinancialFilters, value: any) => {
+    setFilters(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+
+  // Função para limpar filtros
+  const clearFilters = () => {
+    setFilters({});
+  };
+
+  // Funções para modais e ações
+  const handleViewTransaction = (transaction: any) => {
+    setSelectedTransaction(transaction);
+    setIsViewModalOpen(true);
+  };
+
+  const handleEditTransaction = (transaction: any) => {
+    setSelectedTransaction(transaction);
+    setIsEditModalOpen(true);
+  };
+
+  const handleDeleteTransaction = (transaction: any) => {
+    if (confirm(`Tem certeza que deseja excluir a transação "${transaction.description}"?`)) {
+      // TODO: Implementar exclusão via action
+      console.log('Excluindo transação:', transaction.id);
+    }
+  };
+
+  const handleDuplicateTransaction = (transaction: any) => {
+    // TODO: Implementar duplicação via action
+    console.log('Duplicando transação:', transaction.id);
+  };
+
+  const closeModals = () => {
+    setSelectedTransaction(null);
+    setIsEditModalOpen(false);
+    setIsViewModalOpen(false);
+  };
+
+  // Função para obter ícone do status
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'Pago':
+        return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case 'Pendente':
+        return <Clock className="w-4 h-4 text-yellow-500" />;
+      case 'Atrasado':
+        return <AlertCircle className="w-4 h-4 text-red-500" />;
+      case 'Cancelado':
+        return <XCircle className="w-4 h-4 text-gray-500" />;
+      default:
+        return <Clock className="w-4 h-4 text-gray-500" />;
+    }
+  };
+
+  // Função para formatar valor
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  };
+
+  // Função para formatar data
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString('pt-BR');
+  };
   const transactions = [
     {
       id: 1,
@@ -111,21 +245,6 @@ export default function FinancialsPage() {
         return "text-gray-600 bg-gray-100";
       default:
         return "text-gray-600 bg-gray-100";
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "PAID":
-        return <CheckCircle className="h-3 w-3" />;
-      case "PENDING":
-        return <Clock className="h-3 w-3" />;
-      case "OVERDUE":
-        return <AlertCircle className="h-3 w-3" />;
-      case "CANCELED":
-        return <XCircle className="h-3 w-3" />;
-      default:
-        return <Clock className="h-3 w-3" />;
     }
   };
 
@@ -301,10 +420,44 @@ export default function FinancialsPage() {
                   className="w-full pl-10 pr-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </div>
-              <Button variant="outline">
-                <Filter className="h-4 w-4 mr-2" />
-                Filtros
-              </Button>
+              
+              {/* Filtros aprimorados */}
+              <div className="flex gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="w-40 justify-between">
+                      Tipo
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem>Todos os tipos</DropdownMenuItem>
+                    <DropdownMenuItem>Receita</DropdownMenuItem>
+                    <DropdownMenuItem>Despesa</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="w-40 justify-between">
+                      Status
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem>Todos os status</DropdownMenuItem>
+                    <DropdownMenuItem>Pago</DropdownMenuItem>
+                    <DropdownMenuItem>Pendente</DropdownMenuItem>
+                    <DropdownMenuItem>Vencido</DropdownMenuItem>
+                    <DropdownMenuItem>Cancelado</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                
+                <Button variant="outline">
+                  <Filter className="h-4 w-4 mr-2" />
+                  Mais Filtros
+                </Button>
+              </div>
             </div>
 
             {/* Lista de Transações */}
@@ -376,9 +529,35 @@ export default function FinancialsPage() {
                           {transaction.type === "INCOME" ? "+" : "-"}R$ {transaction.amount.toFixed(2)}
                         </div>
                       </div>
-                      <Button variant="ghost" size="sm">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuItem onClick={() => handleViewTransaction(transaction)}>
+                            <Eye className="h-4 w-4 mr-2" />
+                            Visualizar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleEditTransaction(transaction)}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDuplicateTransaction(transaction)}>
+                            <Copy className="h-4 w-4 mr-2" />
+                            Duplicar
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem 
+                            onClick={() => handleDeleteTransaction(transaction)}
+                            className="text-red-600 focus:text-red-600"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Excluir
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
                 </div>
@@ -387,6 +566,262 @@ export default function FinancialsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Modal de Visualização */}
+      {isViewModalOpen && selectedTransaction && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-background rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold">Detalhes da Transação</h2>
+              <Button variant="ghost" onClick={closeModals}>
+                <XCircle className="h-5 w-5" />
+              </Button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Tipo</label>
+                  <p className={`text-sm font-medium ${
+                    selectedTransaction.type === "INCOME" ? "text-green-600" : "text-red-600"
+                  }`}>
+                    {selectedTransaction.type === "INCOME" ? "Receita" : "Despesa"}
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Status</label>
+                  <div className="flex items-center space-x-2">
+                    {getStatusIcon(selectedTransaction.status)}
+                    <span className="text-sm">{getStatusText(selectedTransaction.status)}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Descrição</label>
+                <p className="text-sm">{selectedTransaction.description}</p>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Categoria</label>
+                  <p className="text-sm">{selectedTransaction.category}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Valor</label>
+                  <p className={`text-sm font-bold ${
+                    selectedTransaction.type === "INCOME" ? "text-green-600" : "text-red-600"
+                  }`}>
+                    {selectedTransaction.type === "INCOME" ? "+" : "-"}R$ {selectedTransaction.amount.toFixed(2)}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Data de Vencimento</label>
+                  <p className="text-sm">{new Date(selectedTransaction.dueDate).toLocaleDateString('pt-BR')}</p>
+                </div>
+                {selectedTransaction.paidDate && (
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Data de Pagamento</label>
+                    <p className="text-sm">{new Date(selectedTransaction.paidDate).toLocaleDateString('pt-BR')}</p>
+                  </div>
+                )}
+              </div>
+              
+              {selectedTransaction.apartment && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Apartamento</label>
+                    <p className="text-sm">{selectedTransaction.apartment}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Morador</label>
+                    <p className="text-sm">{selectedTransaction.resident}</p>
+                  </div>
+                </div>
+              )}
+              
+              {selectedTransaction.supplier && (
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Fornecedor</label>
+                  <p className="text-sm">{selectedTransaction.supplier}</p>
+                </div>
+              )}
+              
+              {selectedTransaction.method && (
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Método de Pagamento</label>
+                  <p className="text-sm">{selectedTransaction.method}</p>
+                </div>
+              )}
+            </div>
+            
+            <div className="flex justify-end space-x-2 mt-6">
+              <Button variant="outline" onClick={closeModals}>
+                Fechar
+              </Button>
+              <Button onClick={() => {
+                setIsViewModalOpen(false);
+                setIsEditModalOpen(true);
+              }}>
+                <Edit className="h-4 w-4 mr-2" />
+                Editar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Edição */}
+      {isEditModalOpen && selectedTransaction && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-background rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold">Editar Transação</h2>
+              <Button variant="ghost" onClick={closeModals}>
+                <XCircle className="h-5 w-5" />
+              </Button>
+            </div>
+            
+            <form className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Tipo</label>
+                  <select 
+                    defaultValue={selectedTransaction.type}
+                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  >
+                    <option value="INCOME">Receita</option>
+                    <option value="EXPENSE">Despesa</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Status</label>
+                  <select 
+                    defaultValue={selectedTransaction.status}
+                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  >
+                    <option value="PAID">Pago</option>
+                    <option value="PENDING">Pendente</option>
+                    <option value="OVERDUE">Vencido</option>
+                    <option value="CANCELED">Cancelado</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium mb-2 block">Descrição</label>
+                <input 
+                  type="text"
+                  defaultValue={selectedTransaction.description}
+                  className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Categoria</label>
+                  <input 
+                    type="text"
+                    defaultValue={selectedTransaction.category}
+                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Valor</label>
+                  <input 
+                    type="number"
+                    step="0.01"
+                    defaultValue={selectedTransaction.amount}
+                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Data de Vencimento</label>
+                  <input 
+                    type="date"
+                    defaultValue={selectedTransaction.dueDate}
+                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Data de Pagamento</label>
+                  <input 
+                    type="date"
+                    defaultValue={selectedTransaction.paidDate || ""}
+                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+              </div>
+              
+              {selectedTransaction.apartment && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Apartamento</label>
+                    <input 
+                      type="text"
+                      defaultValue={selectedTransaction.apartment}
+                      className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Morador</label>
+                    <input 
+                      type="text"
+                      defaultValue={selectedTransaction.resident}
+                      className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                </div>
+              )}
+              
+              {selectedTransaction.supplier && (
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Fornecedor</label>
+                  <input 
+                    type="text"
+                    defaultValue={selectedTransaction.supplier}
+                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+              )}
+              
+              <div>
+                <label className="text-sm font-medium mb-2 block">Método de Pagamento</label>
+                <select 
+                  defaultValue={selectedTransaction.method || ""}
+                  className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="">Selecione um método</option>
+                  <option value="PIX">PIX</option>
+                  <option value="Transferência">Transferência</option>
+                  <option value="Cartão">Cartão</option>
+                  <option value="Dinheiro">Dinheiro</option>
+                  <option value="Boleto">Boleto</option>
+                </select>
+              </div>
+            </form>
+            
+            <div className="flex justify-end space-x-2 mt-6">
+              <Button variant="outline" onClick={closeModals}>
+                Cancelar
+              </Button>
+              <Button onClick={() => {
+                // TODO: Implementar salvamento via action
+                console.log('Salvando transação editada');
+                closeModals();
+              }}>
+                Salvar Alterações
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </ContentLayout>
   );
 }

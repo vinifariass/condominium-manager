@@ -1,7 +1,17 @@
+"use client";
+
+import React, { useState, useMemo } from "react";
 import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { 
   Ticket, 
   Plus, 
@@ -26,12 +36,123 @@ import {
   Droplets,
   Wind,
   Shield,
-  Wifi
+  Wifi,
+  X,
+  ChevronDown,
+  Trash2,
+  Copy
 } from "lucide-react";
 
+// Interfaces para tipagem - preparado para backend
+interface TicketComment {
+  id?: number;
+  author: string;
+  date: string;
+  text: string;
+}
+
+interface TicketData {
+  id: number;
+  title: string;
+  description: string;
+  condominium: string;
+  condominiumId: number;
+  apartment: string;
+  resident: string;
+  residentPhone: string;
+  residentEmail: string;
+  category: string;
+  priority: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  assignedTo: string | null;
+  estimatedCompletion?: string;
+  cost: number;
+  comments: TicketComment[];
+}
+
+// Filtros interface - preparado para backend
+interface TicketFilters {
+  search: string;
+  status: string[];
+  category: string[];
+  priority: string[];
+  condominium: string[];
+  apartment: string[];
+  assignedTo: string[];
+  dateRange: {
+    start?: string;
+    end?: string;
+  };
+}
+
+// Constantes para filtros - dados que virão do backend
+const FILTER_OPTIONS = {
+  status: ["Aberto", "Em Andamento", "Aguardando Orçamento", "Concluído"],
+  category: ["Hidráulica", "Elétrica", "Segurança", "Climatização", "Tecnologia", "Manutenção", "Limpeza"],
+  priority: ["Baixa", "Média", "Alta"],
+  condominium: [
+    "Condomínio Santos Dumont",
+    "Condomínio Vila Rica", 
+    "Condomínio Artagus",
+    "Condomínio Cachoeira Dourada"
+  ],
+  apartment: ["101", "102", "103", "201", "202", "203", "301", "302", "303", "401", "402", "403"]
+};
+
 export default function TicketsPage() {
+  // Estados para filtros
+  const [filters, setFilters] = useState<TicketFilters>({
+    search: "",
+    status: [],
+    category: [],
+    priority: [],
+    condominium: [],
+    apartment: [],
+    assignedTo: [],
+    dateRange: {}
+  });
+
+  // Estados para modal de visualização
+  const [selectedTicket, setSelectedTicket] = useState<TicketData | null>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // Função para abrir modal de visualização
+  const openViewModal = (ticket: TicketData) => {
+    setSelectedTicket(ticket);
+    setIsViewModalOpen(true);
+  };
+
+  // Função para abrir modal de edição
+  const openEditModal = (ticket: TicketData) => {
+    setSelectedTicket(ticket);
+    setIsEditModalOpen(true);
+  };
+
+  // Função para fechar modais
+  const closeModals = () => {
+    setSelectedTicket(null);
+    setIsViewModalOpen(false);
+    setIsEditModalOpen(false);
+  };
+
+  // Funções para ações dos tickets
+  const handleDeleteTicket = (ticket: TicketData) => {
+    if (confirm(`Tem certeza que deseja excluir o ticket "${ticket.title}"?`)) {
+      // TODO: Implementar exclusão via action
+      console.log('Excluindo ticket:', ticket.id);
+    }
+  };
+
+  const handleDuplicateTicket = (ticket: TicketData) => {
+    // TODO: Implementar duplicação via action
+    console.log('Duplicando ticket:', ticket.id);
+  };
+
   // Dados simulados de chamados baseados nos condomínios reais
-  const tickets = [
+  const allTickets: TicketData[] = [
     {
       id: 1,
       title: "Vazamento no banheiro do apartamento 301",
@@ -410,35 +531,118 @@ export default function TicketsPage() {
     }
   ];
 
+  // Função para filtrar tickets - preparada para integração com backend
+  const filteredTickets = useMemo(() => {
+    return allTickets.filter(ticket => {
+      // Filtro de pesquisa por texto
+      if (filters.search) {
+        const searchLower = filters.search.toLowerCase();
+        const matchesSearch = 
+          ticket.title.toLowerCase().includes(searchLower) ||
+          ticket.description.toLowerCase().includes(searchLower) ||
+          ticket.resident.toLowerCase().includes(searchLower) ||
+          ticket.apartment.toLowerCase().includes(searchLower) ||
+          ticket.condominium.toLowerCase().includes(searchLower);
+        
+        if (!matchesSearch) return false;
+      }
+
+      // Filtro por status
+      if (filters.status.length > 0 && !filters.status.includes(ticket.status)) {
+        return false;
+      }
+
+      // Filtro por categoria
+      if (filters.category.length > 0 && !filters.category.includes(ticket.category)) {
+        return false;
+      }
+
+      // Filtro por prioridade
+      if (filters.priority.length > 0 && !filters.priority.includes(ticket.priority)) {
+        return false;
+      }
+
+      // Filtro por condomínio
+      if (filters.condominium.length > 0 && !filters.condominium.includes(ticket.condominium)) {
+        return false;
+      }
+
+      // Filtro por apartamento
+      if (filters.apartment.length > 0 && !filters.apartment.includes(ticket.apartment)) {
+        return false;
+      }
+
+      // TODO: Filtro por data (quando integrar com backend)
+      // if (filters.dateRange.start || filters.dateRange.end) {
+      //   // Implementar filtro por data
+      // }
+
+      return true;
+    });
+  }, [allTickets, filters]);
+
+  // Funções para manipular filtros
+  const handleSearchChange = (value: string) => {
+    setFilters(prev => ({ ...prev, search: value }));
+  };
+
+  const toggleFilterOption = (filterType: keyof typeof FILTER_OPTIONS, value: string) => {
+    setFilters(prev => {
+      const currentValues = prev[filterType] as string[];
+      const newValues = currentValues.includes(value)
+        ? currentValues.filter(v => v !== value)
+        : [...currentValues, value];
+      
+      return { ...prev, [filterType]: newValues };
+    });
+  };
+
+  const clearFilter = (filterType: keyof typeof FILTER_OPTIONS) => {
+    setFilters(prev => ({ ...prev, [filterType]: [] }));
+  };
+
+  const clearAllFilters = () => {
+    setFilters({
+      search: "",
+      status: [],
+      category: [],
+      priority: [],
+      condominium: [],
+      apartment: [],
+      assignedTo: [],
+      dateRange: {}
+    });
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Aberto":
-        return "text-blue-600 bg-blue-100";
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
       case "Em Andamento":
-        return "text-yellow-600 bg-yellow-100";
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
       case "Aguardando Orçamento":
-        return "text-orange-600 bg-orange-100";
+        return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200";
       case "Concluído":
-        return "text-green-600 bg-green-100";
+        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
       case "Cancelado":
-        return "text-red-600 bg-red-100";
+        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
       default:
-        return "text-gray-600 bg-gray-100";
+        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "Crítica":
-        return "text-red-600 bg-red-100";
+        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
       case "Alta":
-        return "text-orange-600 bg-orange-100";
+        return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200";
       case "Média":
-        return "text-yellow-600 bg-yellow-100";
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
       case "Baixa":
-        return "text-green-600 bg-green-100";
+        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
       default:
-        return "text-gray-600 bg-gray-100";
+        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
     }
   };
 
@@ -486,8 +690,8 @@ export default function TicketsPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Chamados</h1>
-            <p className="text-gray-600 mt-1">
+            <h1 className="text-3xl font-bold text-foreground">Chamados</h1>
+            <p className="text-muted-foreground mt-1">
               Gerencie os chamados de manutenção dos condomínios
             </p>
           </div>
@@ -505,7 +709,7 @@ export default function TicketsPage() {
               <Ticket className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{tickets.length}</div>
+              <div className="text-2xl font-bold">{filteredTickets.length}</div>
               <p className="text-xs text-muted-foreground">
                 Este mês
               </p>
@@ -519,7 +723,7 @@ export default function TicketsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-yellow-600">
-                {tickets.filter(ticket => ticket.status === "Em Andamento").length}
+                {filteredTickets.filter(ticket => ticket.status === "Em Andamento").length}
               </div>
               <p className="text-xs text-muted-foreground">
                 Sendo resolvidos
@@ -534,10 +738,10 @@ export default function TicketsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">
-                {tickets.filter(ticket => ticket.status === "Concluído").length}
+                {filteredTickets.filter(ticket => ticket.status === "Concluído").length}
               </div>
               <p className="text-xs text-muted-foreground">
-                {((tickets.filter(ticket => ticket.status === "Concluído").length / tickets.length) * 100).toFixed(1)}% do total
+                {filteredTickets.length > 0 ? ((filteredTickets.filter(ticket => ticket.status === "Concluído").length / filteredTickets.length) * 100).toFixed(1) : 0}% do total
               </p>
             </CardContent>
           </Card>
@@ -549,7 +753,7 @@ export default function TicketsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {formatCurrency(tickets.reduce((total, ticket) => total + ticket.cost, 0))}
+                {formatCurrency(filteredTickets.reduce((total: number, ticket: TicketData) => total + ticket.cost, 0))}
               </div>
               <p className="text-xs text-muted-foreground">
                 Estimado/Realizado
@@ -564,30 +768,176 @@ export default function TicketsPage() {
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
                 <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <input
                     type="text"
                     placeholder="Buscar chamados..."
-                    className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="pl-10 pr-4 py-2 w-full border border-input rounded-md bg-background text-foreground focus:ring-2 focus:ring-ring focus:border-ring"
+                    value={filters.search}
+                    onChange={(e) => handleSearchChange(e.target.value)}
                   />
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" className="flex items-center gap-2">
-                  <Filter className="h-4 w-4" />
-                  Status
-                </Button>
-                <Button variant="outline" className="flex items-center gap-2">
-                  <Building2 className="h-4 w-4" />
-                  Condomínio
-                </Button>
-                <Button variant="outline" className="flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4" />
-                  Prioridade
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="flex items-center gap-2">
+                      <Filter className="h-4 w-4" />
+                      Status {filters.status.length > 0 && `(${filters.status.length})`}
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56">
+                    {FILTER_OPTIONS.status.map(option => (
+                      <DropdownMenuItem 
+                        key={option}
+                        onClick={() => toggleFilterOption('status', option)}
+                        className="flex items-center justify-between"
+                      >
+                        <span>{option}</span>
+                        {filters.status.includes(option) && <CheckCircle className="h-4 w-4 text-primary" />}
+                      </DropdownMenuItem>
+                    ))}
+                    {filters.status.length > 0 && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => clearFilter('status')}>
+                          <X className="h-4 w-4 mr-2" />
+                          Limpar seleção
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4" />
+                      Condomínio {filters.condominium.length > 0 && `(${filters.condominium.length})`}
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56">
+                    {FILTER_OPTIONS.condominium.map((option: string) => (
+                      <DropdownMenuItem 
+                        key={option}
+                        onClick={() => toggleFilterOption('condominium', option)}
+                        className="flex items-center justify-between"
+                      >
+                        <span>{option}</span>
+                        {filters.condominium.includes(option) && <CheckCircle className="h-4 w-4 text-primary" />}
+                      </DropdownMenuItem>
+                    ))}
+                    {filters.condominium.length > 0 && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => clearFilter('condominium')}>
+                          <X className="h-4 w-4 mr-2" />
+                          Limpar seleção
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4" />
+                      Prioridade {filters.priority.length > 0 && `(${filters.priority.length})`}
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56">
+                    {FILTER_OPTIONS.priority.map(option => (
+                      <DropdownMenuItem 
+                        key={option}
+                        onClick={() => toggleFilterOption('priority', option)}
+                        className="flex items-center justify-between"
+                      >
+                        <span>{option}</span>
+                        {filters.priority.includes(option) && <CheckCircle className="h-4 w-4 text-primary" />}
+                      </DropdownMenuItem>
+                    ))}
+                    {filters.priority.length > 0 && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => clearFilter('priority')}>
+                          <X className="h-4 w-4 mr-2" />
+                          Limpar seleção
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="flex items-center gap-2">
+                      <Wrench className="h-4 w-4" />
+                      Categoria {filters.category.length > 0 && `(${filters.category.length})`}
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56">
+                    {FILTER_OPTIONS.category.map(option => (
+                      <DropdownMenuItem 
+                        key={option}
+                        onClick={() => toggleFilterOption('category', option)}
+                        className="flex items-center justify-between"
+                      >
+                        <span>{option}</span>
+                        {filters.category.includes(option) && <CheckCircle className="h-4 w-4 text-primary" />}
+                      </DropdownMenuItem>
+                    ))}
+                    {filters.category.length > 0 && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => clearFilter('category')}>
+                          <X className="h-4 w-4 mr-2" />
+                          Limpar seleção
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4" />
+                      Apartamento {filters.apartment.length > 0 && `(${filters.apartment.length})`}
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56">
+                    {FILTER_OPTIONS.apartment.map(option => (
+                      <DropdownMenuItem 
+                        key={option}
+                        onClick={() => toggleFilterOption('apartment', option)}
+                        className="flex items-center justify-between"
+                      >
+                        <span>Apt {option}</span>
+                        {filters.apartment.includes(option) && <CheckCircle className="h-4 w-4 text-primary" />}
+                      </DropdownMenuItem>
+                    ))}
+                    {filters.apartment.length > 0 && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => clearFilter('apartment')}>
+                          <X className="h-4 w-4 mr-2" />
+                          Limpar seleção
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           </CardHeader>
+          <CardContent className="pt-0">
+          </CardContent>
         </Card>
 
         {/* Tickets List */}
@@ -600,20 +950,20 @@ export default function TicketsPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {tickets.map((ticket) => (
+              {filteredTickets.map((ticket) => (
                 <div
                   key={ticket.id}
-                  className="flex flex-col lg:flex-row lg:items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex flex-col lg:flex-row lg:items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex-1 space-y-3 lg:space-y-0 lg:grid lg:grid-cols-6 lg:gap-4">
                     <div className="lg:col-span-2">
                       <div className="flex items-start gap-3">
-                        <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
                           {getCategoryIcon(ticket.category)}
                         </div>
                         <div>
-                          <h3 className="font-semibold text-gray-900 line-clamp-2">{ticket.title}</h3>
-                          <p className="text-sm text-gray-600 mt-1 line-clamp-2">{ticket.description}</p>
+                          <h3 className="font-semibold text-foreground line-clamp-2">{ticket.title}</h3>
+                          <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{ticket.description}</p>
                           <div className="flex items-center gap-2 mt-2">
                             <Badge className={getStatusColor(ticket.status)}>
                               {ticket.status}
@@ -627,51 +977,51 @@ export default function TicketsPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Building2 className="h-4 w-4" />
                         <span className="truncate">{ticket.condominium}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <MapPin className="h-4 w-4" />
                         <span>{ticket.apartment}</span>
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <User className="h-4 w-4" />
                         <span className="truncate">{ticket.resident}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Phone className="h-4 w-4" />
                         <span>{ticket.residentPhone}</span>
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-muted-foreground">
                         <span className="font-medium">Categoria:</span> {ticket.category}
                       </div>
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-muted-foreground">
                         <span className="font-medium">Responsável:</span> {ticket.assignedTo || "Não atribuído"}
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar className="h-4 w-4" />
                         <span>Criado: {formatDate(ticket.createdAt)}</span>
                       </div>
-                      <div className="text-sm text-gray-600">
-                        <span className="font-medium">Previsão:</span> {new Date(ticket.estimatedCompletion).toLocaleDateString('pt-BR')}
+                      <div className="text-sm text-muted-foreground">
+                        <span className="font-medium">Previsão:</span> {ticket.estimatedCompletion ? new Date(ticket.estimatedCompletion).toLocaleDateString('pt-BR') : 'Não definida'}
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-muted-foreground">
                         <span className="font-medium">Custo:</span> {formatCurrency(ticket.cost)}
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <MessageSquare className="h-4 w-4" />
                         <span>{ticket.comments.length} comentários</span>
                       </div>
@@ -679,23 +1029,463 @@ export default function TicketsPage() {
                   </div>
 
                   <div className="flex items-center gap-2 mt-4 lg:mt-0">
-                    <Button variant="outline" size="sm" className="flex items-center gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex items-center gap-2"
+                      onClick={() => openViewModal(ticket)}
+                    >
                       <Eye className="h-4 w-4" />
                       Ver
                     </Button>
-                    <Button variant="outline" size="sm" className="flex items-center gap-2">
-                      <Edit className="h-4 w-4" />
-                      Editar
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuItem onClick={() => openEditModal(ticket)}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Editar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDuplicateTicket(ticket)}>
+                          <Copy className="h-4 w-4 mr-2" />
+                          Duplicar
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          onClick={() => handleDeleteTicket(ticket)}
+                          className="text-red-600 focus:text-red-600"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Excluir
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
               ))}
             </div>
           </CardContent>
         </Card>
+
+        {/* Modal de Visualização de Ticket */}
+        {isViewModalOpen && selectedTicket && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            onClick={closeModals}
+          >
+            <div 
+              className="bg-background rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-6">
+                {/* Header do Modal */}
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 rounded-lg bg-primary/10">
+                      {getCategoryIcon(selectedTicket.category)}
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold">{selectedTicket.title}</h2>
+                      <p className="text-muted-foreground">#{selectedTicket.id.toString().padStart(4, '0')}</p>
+                    </div>
+                  </div>
+                  <Button variant="ghost" onClick={closeModals}>
+                    <X className="h-5 w-5" />
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Coluna Principal - Detalhes */}
+                  <div className="lg:col-span-2 space-y-6">
+                    {/* Informações Básicas */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Detalhes do Chamado</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <label className="font-medium text-sm">Descrição</label>
+                          <p className="text-muted-foreground mt-1">{selectedTicket.description}</p>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="font-medium text-sm">Categoria</label>
+                            <p className="text-muted-foreground mt-1">{selectedTicket.category}</p>
+                          </div>
+                          <div>
+                            <label className="font-medium text-sm">Prioridade</label>
+                            <Badge className={`mt-1 ${getPriorityColor(selectedTicket.priority)}`}>
+                              {selectedTicket.priority}
+                            </Badge>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="font-medium text-sm">Status</label>
+                            <Badge className={`mt-1 ${getStatusColor(selectedTicket.status)}`}>
+                              {selectedTicket.status}
+                            </Badge>
+                          </div>
+                          <div>
+                            <label className="font-medium text-sm">Custo Estimado</label>
+                            <p className="text-muted-foreground mt-1">{formatCurrency(selectedTicket.cost)}</p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="font-medium text-sm">Data de Criação</label>
+                            <p className="text-muted-foreground mt-1">{formatDate(selectedTicket.createdAt)}</p>
+                          </div>
+                          <div>
+                            <label className="font-medium text-sm">Última Atualização</label>
+                            <p className="text-muted-foreground mt-1">{formatDate(selectedTicket.updatedAt)}</p>
+                          </div>
+                        </div>
+                        
+                        {selectedTicket.estimatedCompletion && (
+                          <div>
+                            <label className="font-medium text-sm">Previsão de Conclusão</label>
+                            <p className="text-muted-foreground mt-1">{formatDate(selectedTicket.estimatedCompletion)}</p>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    {/* Localização */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Localização</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="font-medium text-sm">Condomínio</label>
+                            <p className="text-muted-foreground mt-1">{selectedTicket.condominium}</p>
+                          </div>
+                          <div>
+                            <label className="font-medium text-sm">Apartamento</label>
+                            <p className="text-muted-foreground mt-1">{selectedTicket.apartment || 'Área comum'}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Comentários */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Comentários ({selectedTicket.comments.length})</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {selectedTicket.comments.map((comment, index) => (
+                            <div key={index} className="border-l-4 border-primary pl-4 py-2">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="font-medium">{comment.author}</span>
+                                <span className="text-sm text-muted-foreground">{formatDate(comment.date)}</span>
+                              </div>
+                              <p className="text-muted-foreground">{comment.text}</p>
+                            </div>
+                          ))}
+                          {selectedTicket.comments.length === 0 && (
+                            <p className="text-center text-muted-foreground py-4">Nenhum comentário ainda</p>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Coluna Lateral - Informações do Solicitante e Ações */}
+                  <div className="space-y-6">
+                    {/* Solicitante */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Solicitante</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                            <User className="h-5 w-5 text-primary-foreground" />
+                          </div>
+                          <div>
+                            <p className="font-medium">{selectedTicket.resident}</p>
+                            <p className="text-sm text-muted-foreground">Solicitante</p>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Phone className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm">{selectedTicket.residentPhone}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Mail className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm">{selectedTicket.residentEmail}</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Responsável */}
+                    {selectedTicket.assignedTo && (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Responsável</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center">
+                              <User className="h-5 w-5 text-secondary-foreground" />
+                            </div>
+                            <div>
+                              <p className="font-medium">{selectedTicket.assignedTo}</p>
+                              <p className="text-sm text-muted-foreground">Técnico responsável</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Ações */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Ações</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <Button className="w-full" variant="outline">
+                          <Edit className="h-4 w-4 mr-2" />
+                          Editar Chamado
+                        </Button>
+                        <Button className="w-full" variant="outline">
+                          <MessageSquare className="h-4 w-4 mr-2" />
+                          Adicionar Comentário
+                        </Button>
+                        {selectedTicket.status === 'Aberto' && (
+                          <Button className="w-full" variant="default">
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                            Marcar como Resolvido
+                          </Button>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    {/* Timeline */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Timeline</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          <div className="flex items-start gap-3">
+                            <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                            <div>
+                              <p className="text-sm font-medium">Chamado criado</p>
+                              <p className="text-xs text-muted-foreground">{formatDate(selectedTicket.createdAt)}</p>
+                            </div>
+                          </div>
+                          {selectedTicket.comments.map((comment, index) => (
+                            <div key={index} className="flex items-start gap-3">
+                              <div className="w-2 h-2 bg-muted rounded-full mt-2"></div>
+                              <div>
+                                <p className="text-sm font-medium">Comentário por {comment.author}</p>
+                                <p className="text-xs text-muted-foreground">{formatDate(comment.date)}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+                
+                {/* Botões do Modal */}
+                <div className="flex justify-end space-x-2 mt-6 px-6 pb-6">
+                  <Button variant="outline" onClick={closeModals}>
+                    Fechar
+                  </Button>
+                  <Button onClick={() => {
+                    setIsViewModalOpen(false);
+                    setIsEditModalOpen(true);
+                  }}>
+                    <Edit className="h-4 w-4 mr-2" />
+                    Editar
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal de Edição */}
+        {isEditModalOpen && selectedTicket && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-background rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold">Editar Ticket</h2>
+                <Button variant="ghost" onClick={closeModals}>
+                  <XCircle className="h-5 w-5" />
+                </Button>
+              </div>
+              
+              <form className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Título</label>
+                  <input 
+                    type="text"
+                    defaultValue={selectedTicket.title}
+                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Descrição</label>
+                  <textarea 
+                    defaultValue={selectedTicket.description}
+                    rows={3}
+                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Status</label>
+                    <select 
+                      defaultValue={selectedTicket.status}
+                      className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                    >
+                      <option value="Aberto">Aberto</option>
+                      <option value="Em Andamento">Em Andamento</option>
+                      <option value="Aguardando Orçamento">Aguardando Orçamento</option>
+                      <option value="Concluído">Concluído</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Prioridade</label>
+                    <select 
+                      defaultValue={selectedTicket.priority}
+                      className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                    >
+                      <option value="Baixa">Baixa</option>
+                      <option value="Média">Média</option>
+                      <option value="Alta">Alta</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Categoria</label>
+                    <select 
+                      defaultValue={selectedTicket.category}
+                      className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                    >
+                      <option value="Hidráulica">Hidráulica</option>
+                      <option value="Elétrica">Elétrica</option>
+                      <option value="Segurança">Segurança</option>
+                      <option value="Climatização">Climatização</option>
+                      <option value="Tecnologia">Tecnologia</option>
+                      <option value="Manutenção">Manutenção</option>
+                      <option value="Limpeza">Limpeza</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Condomínio</label>
+                    <input 
+                      type="text"
+                      defaultValue={selectedTicket.condominium}
+                      className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Apartamento</label>
+                    <input 
+                      type="text"
+                      defaultValue={selectedTicket.apartment}
+                      className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Morador</label>
+                    <input 
+                      type="text"
+                      defaultValue={selectedTicket.resident}
+                      className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Telefone</label>
+                    <input 
+                      type="text"
+                      defaultValue={selectedTicket.residentPhone}
+                      className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Email</label>
+                    <input 
+                      type="email"
+                      defaultValue={selectedTicket.residentEmail}
+                      className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Responsável</label>
+                    <input 
+                      type="text"
+                      defaultValue={selectedTicket.assignedTo || ""}
+                      className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Custo Estimado</label>
+                    <input 
+                      type="number"
+                      step="0.01"
+                      defaultValue={selectedTicket.cost}
+                      className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Previsão de Conclusão</label>
+                  <input 
+                    type="date"
+                    defaultValue={selectedTicket.estimatedCompletion || ""}
+                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+              </form>
+              
+              <div className="flex justify-end space-x-2 mt-6">
+                <Button variant="outline" onClick={closeModals}>
+                  Cancelar
+                </Button>
+                <Button onClick={() => {
+                  // TODO: Implementar salvamento via action
+                  console.log('Salvando ticket editado');
+                  closeModals();
+                }}>
+                  Salvar Alterações
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </ContentLayout>
   );

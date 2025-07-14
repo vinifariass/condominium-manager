@@ -13,9 +13,9 @@ export const metadata: Metadata = {
       ? `https://${process.env.VERCEL_URL}`
       : `http://localhost:${process.env.PORT || 3000}`
   ),
-  title: "Condominium Dashboard",
+  title: "Condely - Sistema de Gestão Condominial",
   description:
-    "A stunning and functional retractable sidebar for Next.js built on top of shadcn/ui complete with desktop and mobile responsiveness.",
+    "Sistema completo de gestão condominial com controle de visitantes, financeiro, manutenção e muito mais. Interface moderna e responsiva.",
   alternates: {
     canonical: "/"
   },

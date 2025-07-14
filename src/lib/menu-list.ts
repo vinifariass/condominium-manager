@@ -16,7 +16,8 @@ import {
   Wrench,
   LucideIcon,
   HelpCircle,
-  Calculator
+  Calculator,
+  FileSpreadsheet
 } from "lucide-react";
 
 type Submenu = {
@@ -103,6 +104,11 @@ export function getMenuList(pathname: string): Group[] {
           href: "/tickets",
           label: "Chamados",
           icon: HeadphonesIcon
+        },
+        {
+          href: "/import",
+          label: "Importação Excel",
+          icon: FileSpreadsheet
         }
       ]
     },

@@ -1,7 +1,17 @@
+"use client";
+
+import React, { useState, useMemo } from "react";
 import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { 
   Building2, 
   Plus, 
@@ -17,12 +27,80 @@ import {
   MapPin,
   Calendar,
   TrendingUp,
-  Home
+  Home,
+  ChevronDown,
+  X,
+  CheckCircle,
+  XCircle,
+  Trash2,
+  Copy
 } from "lucide-react";
 
+// Interface para apartamentos
+interface ApartmentData {
+  id: number;
+  number: string;
+  block: string;
+  floor: number;
+  condominium: string;
+  condominiumId: number;
+  bedrooms: number;
+  bathrooms: number;
+  parkingSpaces: number;
+  area: number;
+  status: string;
+  type: string;
+  residents: number;
+  owner: string;
+  ownerPhone: string;
+  ownerEmail: string;
+  monthlyFee: number;
+  balanceDue: number;
+  lastPayment: string;
+  observations: string;
+}
+
+// Interface para filtros
+interface ApartmentFilters {
+  search: string;
+  status: string[];
+  type: string[];
+  condominium: string[];
+  bedrooms: string[];
+}
+
+// Constantes para filtros
+const FILTER_OPTIONS = {
+  status: ["Ocupado", "Vago", "Manutenção"],
+  type: ["Luxo", "Premium", "Padrão", "Compacto"],
+  condominium: [
+    "Condomínio Santos Dumont",
+    "Condomínio Barra Garden", 
+    "Condomínio Praia Azul",
+    "Condomínio Cachoeira Dourada",
+    "Condomínio Recanto",
+    "Condomínio Vivenda"
+  ],
+  bedrooms: ["1", "2", "3", "4", "5+"]
+};
+
 export default function ApartmentsPage() {
+  // Estados para filtros
+  const [filters, setFilters] = useState<ApartmentFilters>({
+    search: "",
+    status: [],
+    type: [],
+    condominium: [],
+    bedrooms: []
+  });
+
+  // Estados para modais
+  const [selectedApartment, setSelectedApartment] = useState<ApartmentData | null>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
   // Dados simulados de apartamentos baseados nos condomínios reais
-  const apartments = [
+  const allApartments: ApartmentData[] = [
     {
       id: 1,
       number: "101",
@@ -201,6 +279,108 @@ export default function ApartmentsPage() {
     }
   ];
 
+  // Funções para modais
+  const openViewModal = (apartment: ApartmentData) => {
+    setSelectedApartment(apartment);
+    setIsViewModalOpen(true);
+  };
+
+  const openEditModal = (apartment: ApartmentData) => {
+    setSelectedApartment(apartment);
+    setIsEditModalOpen(true);
+  };
+
+  const closeModals = () => {
+    setSelectedApartment(null);
+    setIsViewModalOpen(false);
+    setIsEditModalOpen(false);
+  };
+
+  // Funções para ações
+  const handleDeleteApartment = (apartment: ApartmentData) => {
+    if (confirm(`Tem certeza que deseja excluir o apartamento ${apartment.number}?`)) {
+      // TODO: Implementar exclusão via action
+      console.log('Excluindo apartamento:', apartment.id);
+    }
+  };
+
+  const handleDuplicateApartment = (apartment: ApartmentData) => {
+    // TODO: Implementar duplicação via action
+    console.log('Duplicando apartamento:', apartment.id);
+  };
+
+  // Lógica de filtragem
+  const filteredApartments = useMemo(() => {
+    return allApartments.filter(apartment => {
+      // Filtro de pesquisa por texto
+      if (filters.search) {
+        const searchLower = filters.search.toLowerCase();
+        const matchesSearch = 
+          apartment.number.toLowerCase().includes(searchLower) ||
+          apartment.owner.toLowerCase().includes(searchLower) ||
+          apartment.condominium.toLowerCase().includes(searchLower) ||
+          apartment.block.toLowerCase().includes(searchLower);
+        
+        if (!matchesSearch) return false;
+      }
+
+      // Filtro por status
+      if (filters.status.length > 0 && !filters.status.includes(apartment.status)) {
+        return false;
+      }
+
+      // Filtro por tipo
+      if (filters.type.length > 0 && !filters.type.includes(apartment.type)) {
+        return false;
+      }
+
+      // Filtro por condomínio
+      if (filters.condominium.length > 0 && !filters.condominium.includes(apartment.condominium)) {
+        return false;
+      }
+
+      // Filtro por quartos
+      if (filters.bedrooms.length > 0) {
+        const bedroomStr = apartment.bedrooms >= 5 ? "5+" : apartment.bedrooms.toString();
+        if (!filters.bedrooms.includes(bedroomStr)) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [allApartments, filters]);
+
+  // Funções para manipular filtros
+  const handleSearchChange = (value: string) => {
+    setFilters(prev => ({ ...prev, search: value }));
+  };
+
+  const toggleFilterOption = (filterType: keyof typeof FILTER_OPTIONS, value: string) => {
+    setFilters(prev => {
+      const currentValues = prev[filterType] as string[];
+      const newValues = currentValues.includes(value)
+        ? currentValues.filter(v => v !== value)
+        : [...currentValues, value];
+      
+      return { ...prev, [filterType]: newValues };
+    });
+  };
+
+  const clearFilter = (filterType: keyof typeof FILTER_OPTIONS) => {
+    setFilters(prev => ({ ...prev, [filterType]: [] }));
+  };
+
+  const clearAllFilters = () => {
+    setFilters({
+      search: "",
+      status: [],
+      type: [],
+      condominium: [],
+      bedrooms: []
+    });
+  };
+
   // Função para obter cor do status
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -240,12 +420,12 @@ export default function ApartmentsPage() {
   };
 
   // Estatísticas
-  const totalApartments = apartments.length;
-  const occupiedApartments = apartments.filter(apt => apt.status === "Ocupado").length;
-  const vacantApartments = apartments.filter(apt => apt.status === "Vago").length;
+  const totalApartments = allApartments.length;
+  const occupiedApartments = allApartments.filter(apt => apt.status === "Ocupado").length;
+  const vacantApartments = allApartments.filter(apt => apt.status === "Vago").length;
   const occupancyRate = ((occupiedApartments / totalApartments) * 100).toFixed(1);
-  const totalMonthlyFees = apartments.reduce((sum, apt) => sum + apt.monthlyFee, 0);
-  const totalBalanceDue = apartments.reduce((sum, apt) => sum + apt.balanceDue, 0);
+  const totalMonthlyFees = allApartments.reduce((sum, apt) => sum + apt.monthlyFee, 0);
+  const totalBalanceDue = allApartments.reduce((sum, apt) => sum + apt.balanceDue, 0);
 
   return (
     <ContentLayout title="Apartamentos">
@@ -300,7 +480,7 @@ export default function ApartmentsPage() {
             <CardContent>
               <div className="text-2xl font-bold">{formatCurrency(totalBalanceDue)}</div>
               <p className="text-xs text-muted-foreground">
-                {apartments.filter(apt => apt.balanceDue > 0).length} inadimplentes
+                {allApartments.filter(apt => apt.balanceDue > 0).length} inadimplentes
               </p>
             </CardContent>
           </Card>
@@ -316,14 +496,139 @@ export default function ApartmentsPage() {
                   <input
                     type="text"
                     placeholder="Buscar apartamentos..."
+                    value={filters.search}
+                    onChange={(e) => handleSearchChange(e.target.value)}
                     className="pl-10 pr-4 py-2 w-full border border-input rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:border-input"
                   />
                 </div>
               </div>
-              <Button variant="outline" className="flex items-center gap-2">
-                <Filter className="h-4 w-4" />
-                Filtros
-              </Button>
+              
+              <div className="flex gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="flex items-center gap-2">
+                      <Filter className="h-4 w-4" />
+                      Status {filters.status.length > 0 && `(${filters.status.length})`}
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56">
+                    {FILTER_OPTIONS.status.map(option => (
+                      <DropdownMenuItem 
+                        key={option}
+                        onClick={() => toggleFilterOption('status', option)}
+                        className="flex items-center justify-between"
+                      >
+                        <span>{option}</span>
+                        {filters.status.includes(option) && <CheckCircle className="h-4 w-4 text-primary" />}
+                      </DropdownMenuItem>
+                    ))}
+                    {filters.status.length > 0 && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => clearFilter('status')}>
+                          <X className="h-4 w-4 mr-2" />
+                          Limpar seleção
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="flex items-center gap-2">
+                      <Home className="h-4 w-4" />
+                      Tipo {filters.type.length > 0 && `(${filters.type.length})`}
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56">
+                    {FILTER_OPTIONS.type.map(option => (
+                      <DropdownMenuItem 
+                        key={option}
+                        onClick={() => toggleFilterOption('type', option)}
+                        className="flex items-center justify-between"
+                      >
+                        <span>{option}</span>
+                        {filters.type.includes(option) && <CheckCircle className="h-4 w-4 text-primary" />}
+                      </DropdownMenuItem>
+                    ))}
+                    {filters.type.length > 0 && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => clearFilter('type')}>
+                          <X className="h-4 w-4 mr-2" />
+                          Limpar seleção
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4" />
+                      Condomínio {filters.condominium.length > 0 && `(${filters.condominium.length})`}
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56">
+                    {FILTER_OPTIONS.condominium.map((option: string) => (
+                      <DropdownMenuItem 
+                        key={option}
+                        onClick={() => toggleFilterOption('condominium', option)}
+                        className="flex items-center justify-between"
+                      >
+                        <span>{option}</span>
+                        {filters.condominium.includes(option) && <CheckCircle className="h-4 w-4 text-primary" />}
+                      </DropdownMenuItem>
+                    ))}
+                    {filters.condominium.length > 0 && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => clearFilter('condominium')}>
+                          <X className="h-4 w-4 mr-2" />
+                          Limpar seleção
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="flex items-center gap-2">
+                      <Bed className="h-4 w-4" />
+                      Quartos {filters.bedrooms.length > 0 && `(${filters.bedrooms.length})`}
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56">
+                    {FILTER_OPTIONS.bedrooms.map(option => (
+                      <DropdownMenuItem 
+                        key={option}
+                        onClick={() => toggleFilterOption('bedrooms', option)}
+                        className="flex items-center justify-between"
+                      >
+                        <span>{option} {option === "5+" ? "ou mais" : option === "1" ? "quarto" : "quartos"}</span>
+                        {filters.bedrooms.includes(option) && <CheckCircle className="h-4 w-4 text-primary" />}
+                      </DropdownMenuItem>
+                    ))}
+                    {filters.bedrooms.length > 0 && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => clearFilter('bedrooms')}>
+                          <X className="h-4 w-4 mr-2" />
+                          Limpar seleção
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+              
               <Button className="flex items-center gap-2">
                 <Plus className="h-4 w-4" />
                 Novo Apartamento
@@ -335,14 +640,28 @@ export default function ApartmentsPage() {
         {/* Lista de Apartamentos */}
         <Card>
           <CardHeader>
-            <CardTitle>Lista de Apartamentos</CardTitle>
-            <CardDescription>
-              Todos os apartamentos cadastrados no sistema
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Lista de Apartamentos</CardTitle>
+                <CardDescription>
+                  {filteredApartments.length === allApartments.length 
+                    ? `${allApartments.length} apartamentos cadastrados no sistema`
+                    : `${filteredApartments.length} de ${allApartments.length} apartamentos`
+                  }
+                </CardDescription>
+              </div>
+              {(filters.search || filters.status.length > 0 || filters.type.length > 0 || 
+                filters.condominium.length > 0 || filters.bedrooms.length > 0) && (
+                <Button variant="outline" onClick={clearAllFilters}>
+                  <X className="h-4 w-4 mr-2" />
+                  Limpar Filtros
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {apartments.map((apartment) => (
+              {filteredApartments.map((apartment) => (
                 <div
                   key={apartment.id}
                   className="flex flex-col lg:flex-row lg:items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors dark:border-border"
@@ -447,17 +766,40 @@ export default function ApartmentsPage() {
 
                   {/* Ações */}
                   <div className="flex items-center gap-2 mt-4 lg:mt-0">
-                    <Button variant="outline" size="sm" className="flex items-center gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex items-center gap-2"
+                      onClick={() => openViewModal(apartment)}
+                    >
                       <Eye className="h-4 w-4" />
                       Ver
                     </Button>
-                    <Button variant="outline" size="sm" className="flex items-center gap-2">
-                      <Edit className="h-4 w-4" />
-                      Editar
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuItem onClick={() => openEditModal(apartment)}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Editar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDuplicateApartment(apartment)}>
+                          <Copy className="h-4 w-4 mr-2" />
+                          Duplicar
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          onClick={() => handleDeleteApartment(apartment)}
+                          className="text-red-600 focus:text-red-600"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Excluir
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
               ))}
@@ -465,6 +807,328 @@ export default function ApartmentsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Modal de Visualização */}
+      {isViewModalOpen && selectedApartment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-background rounded-lg p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold">Apartamento {selectedApartment.number} - Bloco {selectedApartment.block}</h2>
+                <p className="text-muted-foreground">{selectedApartment.condominium}</p>
+              </div>
+              <Button variant="ghost" onClick={closeModals}>
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Informações Básicas */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Informações Básicas</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Status:</span>
+                    <Badge className={getStatusColor(selectedApartment.status)}>
+                      {selectedApartment.status}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Tipo:</span>
+                    <Badge className={getTypeColor(selectedApartment.type)}>
+                      {selectedApartment.type}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Andar:</span>
+                    <span className="text-sm">{selectedApartment.floor}º andar</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Área:</span>
+                    <span className="text-sm">{selectedApartment.area}m²</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Quartos:</span>
+                    <span className="text-sm">{selectedApartment.bedrooms}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Banheiros:</span>
+                    <span className="text-sm">{selectedApartment.bathrooms}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Vagas:</span>
+                    <span className="text-sm">{selectedApartment.parkingSpaces}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Moradores:</span>
+                    <span className="text-sm">{selectedApartment.residents}</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Informações do Proprietário */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Proprietário</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <span className="text-sm font-medium">Nome:</span>
+                    <p className="text-sm text-muted-foreground">{selectedApartment.owner}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium">Telefone:</span>
+                    <p className="text-sm text-muted-foreground">{selectedApartment.ownerPhone}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium">Email:</span>
+                    <p className="text-sm text-muted-foreground">{selectedApartment.ownerEmail}</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Informações Financeiras */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Financeiro</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Taxa Mensal:</span>
+                    <span className="text-sm font-bold text-green-600">
+                      {formatCurrency(selectedApartment.monthlyFee)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Saldo Devedor:</span>
+                    <span className={`text-sm font-bold ${selectedApartment.balanceDue > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                      {formatCurrency(selectedApartment.balanceDue)}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium">Último Pagamento:</span>
+                    <p className="text-sm text-muted-foreground">
+                      {new Date(selectedApartment.lastPayment).toLocaleDateString('pt-BR')}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Observações */}
+              <Card className="lg:col-span-3">
+                <CardHeader>
+                  <CardTitle>Observações</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">{selectedApartment.observations}</p>
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div className="flex justify-end space-x-2 mt-6">
+              <Button variant="outline" onClick={closeModals}>
+                Fechar
+              </Button>
+              <Button onClick={() => {
+                setIsViewModalOpen(false);
+                setIsEditModalOpen(true);
+              }}>
+                <Edit className="h-4 w-4 mr-2" />
+                Editar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Edição */}
+      {isEditModalOpen && selectedApartment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-background rounded-lg p-6 w-full max-w-3xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold">Editar Apartamento</h2>
+              <Button variant="ghost" onClick={closeModals}>
+                <XCircle className="h-5 w-5" />
+              </Button>
+            </div>
+            
+            <form className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Número</label>
+                  <input 
+                    type="text"
+                    defaultValue={selectedApartment.number}
+                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Bloco</label>
+                  <input 
+                    type="text"
+                    defaultValue={selectedApartment.block}
+                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Status</label>
+                  <select 
+                    defaultValue={selectedApartment.status}
+                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  >
+                    <option value="Ocupado">Ocupado</option>
+                    <option value="Vago">Vago</option>
+                    <option value="Manutenção">Manutenção</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Tipo</label>
+                  <select 
+                    defaultValue={selectedApartment.type}
+                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  >
+                    <option value="Luxo">Luxo</option>
+                    <option value="Premium">Premium</option>
+                    <option value="Padrão">Padrão</option>
+                    <option value="Compacto">Compacto</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Quartos</label>
+                  <input 
+                    type="number"
+                    defaultValue={selectedApartment.bedrooms}
+                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Banheiros</label>
+                  <input 
+                    type="number"
+                    defaultValue={selectedApartment.bathrooms}
+                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Vagas</label>
+                  <input 
+                    type="number"
+                    defaultValue={selectedApartment.parkingSpaces}
+                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Área (m²)</label>
+                  <input 
+                    type="number"
+                    step="0.1"
+                    defaultValue={selectedApartment.area}
+                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Andar</label>
+                  <input 
+                    type="number"
+                    defaultValue={selectedApartment.floor}
+                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Número de Moradores</label>
+                  <input 
+                    type="number"
+                    defaultValue={selectedApartment.residents}
+                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-2 block">Proprietário</label>
+                <input 
+                  type="text"
+                  defaultValue={selectedApartment.owner}
+                  className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Telefone</label>
+                  <input 
+                    type="text"
+                    defaultValue={selectedApartment.ownerPhone}
+                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Email</label>
+                  <input 
+                    type="email"
+                    defaultValue={selectedApartment.ownerEmail}
+                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Taxa Mensal</label>
+                  <input 
+                    type="number"
+                    step="0.01"
+                    defaultValue={selectedApartment.monthlyFee}
+                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Saldo Devedor</label>
+                  <input 
+                    type="number"
+                    step="0.01"
+                    defaultValue={selectedApartment.balanceDue}
+                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-2 block">Observações</label>
+                <textarea 
+                  defaultValue={selectedApartment.observations}
+                  rows={3}
+                  className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+              </div>
+            </form>
+            
+            <div className="flex justify-end space-x-2 mt-6">
+              <Button variant="outline" onClick={closeModals}>
+                Cancelar
+              </Button>
+              <Button onClick={() => {
+                // TODO: Implementar salvamento via action
+                console.log('Salvando apartamento editado');
+                closeModals();
+              }}>
+                Salvar Alterações
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </ContentLayout>
   );
 }

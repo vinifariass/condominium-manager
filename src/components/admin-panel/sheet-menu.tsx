@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MenuIcon, PanelsTopLeft } from "lucide-react";
+import CondominiumIcon from "@/components/ui/condominium-icon";
 
 import { Button } from "@/components/ui/button";
 import { Menu } from "@/components/admin-panel/menu";
@@ -27,8 +28,11 @@ export function SheetMenu() {
             asChild
           >
             <Link href="/dashboard" className="flex items-center gap-2">
-              <PanelsTopLeft className="w-6 h-6 mr-1" />
-              <SheetTitle className="font-bold text-lg">Brand</SheetTitle>
+              <CondominiumIcon 
+                className="w-6 h-6 mr-1 text-blue-600 dark:text-white hover:text-blue-700 dark:hover:text-blue-200 transition-colors drop-shadow-sm" 
+                size={24}
+              />
+              <SheetTitle className="font-bold text-lg">Condely</SheetTitle>
             </Link>
           </Button>
         </SheetHeader>
