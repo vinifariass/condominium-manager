@@ -67,7 +67,7 @@ export default function LoginPage() {
                   <div>
                     <p className="text-sm font-medium">Carlos Silva</p>
                     <p className="text-xs text-muted-foreground">Síndico - Residencial Jardim das Flores</p>
-                    <p className="text-sm mt-1">"O sistema revolucionou nossa gestão!"</p>
+                    <p className="text-sm mt-1">&ldquo;O sistema revolucionou nossa gestão!&rdquo;</p>
                   </div>
                 </div>
                 
@@ -78,7 +78,7 @@ export default function LoginPage() {
                   <div>
                     <p className="text-sm font-medium">Ana Santos</p>
                     <p className="text-xs text-muted-foreground">Administradora - Portal do Sol</p>
-                    <p className="text-sm mt-1">"Interface intuitiva e muito completa."</p>
+                    <p className="text-sm mt-1">&ldquo;Interface intuitiva e muito completa.&rdquo;</p>
                   </div>
                 </div>
               </div>

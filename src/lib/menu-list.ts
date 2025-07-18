@@ -14,7 +14,9 @@ import {
   BarChart3,
   MapPin,
   Wrench,
-  LucideIcon
+  LucideIcon,
+  HelpCircle,
+  Calculator
 } from "lucide-react";
 
 type Submenu = {
@@ -68,9 +70,14 @@ export function getMenuList(pathname: string): Group[] {
           icon: Users
         },
         {
+          href: "/visitor-control",
+          label: "Controle de Visitantes",
+          icon: UserCheck
+        },
+        {
           href: "/employees",
           label: "Funcionários",
-          icon: UserCheck
+          icon: Users
         }
       ]
     },
@@ -150,6 +157,16 @@ export function getMenuList(pathname: string): Group[] {
           href: "/settings",
           label: "Configurações",
           icon: Settings
+        },
+        {
+          href: "/help",
+          label: "Como usar",
+          icon: HelpCircle
+        },
+        {
+          href: "/pricing",
+          label: "Planos e Preços",
+          icon: Calculator
         },
         {
           href: "/cards",
