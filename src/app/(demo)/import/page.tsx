@@ -28,8 +28,10 @@ import {
   Mail,
   Send,
   Settings,
-  Bell
+  Bell,
+  Building2
 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface ServiceRecord {
   id: string;
@@ -57,12 +59,19 @@ interface NotificationSettings {
   daysBeforeExpiry: number;
 }
 
+interface Condominium {
+  id: string;
+  name: string;
+  address: string;
+}
+
 export default function ImportPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [importComplete, setImportComplete] = useState(false);
+  const [selectedCondominium, setSelectedCondominium] = useState<string>("");
   const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>({
     sms: false,
     whatsapp: true,
@@ -71,6 +80,15 @@ export default function ImportPage() {
     daysBeforeExpiry: 7
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Lista de condomínios disponíveis (simulação)
+  const condominiums: Condominium[] = [
+    { id: "1", name: "Residencial Villa Verde", address: "Rua das Flores, 123" },
+    { id: "2", name: "Edifício Sunset", address: "Av. Principal, 456" },
+    { id: "3", name: "Condomínio Jardim das Acácias", address: "Rua dos Ipês, 789" },
+    { id: "4", name: "Residencial Parque Imperial", address: "Av. Central, 321" },
+    { id: "5", name: "Edifício Royal Tower", address: "Rua Premium, 654" }
+  ];
 
   // Lista de serviços válidos (simulação)
   const validServices = [
@@ -86,6 +104,13 @@ export default function ImportPage() {
     'Manutenção Hidráulica',
     'Limpeza Geral'
   ];
+
+  const handleCondominiumChange = (condominiumId: string) => {
+    setSelectedCondominium(condominiumId);
+    // Reset validação e importação quando mudar condomínio
+    setValidationResult(null);
+    setImportComplete(false);
+  };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -131,7 +156,7 @@ export default function ImportPage() {
   };
 
   const processFile = async () => {
-    if (!selectedFile) return;
+    if (!selectedFile || !selectedCondominium) return;
     
     setIsProcessing(true);
     
@@ -338,10 +363,61 @@ export default function ImportPage() {
           </CardContent>
         </Card>
 
+        {/* Seleção do Condomínio */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5" />
+              1. Selecionar Condomínio
+            </CardTitle>
+            <CardDescription>
+              Escolha o condomínio para o qual os serviços serão importados e notificados
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">
+                  Condomínio de Destino
+                </label>
+                <Select value={selectedCondominium} onValueChange={handleCondominiumChange}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Selecione o condomínio..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {condominiums.map((condo) => (
+                      <SelectItem key={condo.id} value={condo.id}>
+                        <div className="flex flex-col">
+                          <span className="font-medium">{condo.name}</span>
+                          <span className="text-xs text-muted-foreground">{condo.address}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {selectedCondominium && (
+                <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                  <div className="flex items-center gap-2 text-green-800 dark:text-green-200">
+                    <CheckCircle2 className="h-4 w-4" />
+                    <span className="text-sm font-medium">
+                      Condomínio selecionado: {condominiums.find(c => c.id === selectedCondominium)?.name}
+                    </span>
+                  </div>
+                  <p className="text-xs text-green-700 dark:text-green-300 mt-1">
+                    Os alertas de vencimento incluirão o nome deste condomínio nas notificações
+                  </p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Upload de Arquivo */}
         <Card>
           <CardHeader>
-            <CardTitle>1. Selecionar Arquivo</CardTitle>
+            <CardTitle>2. Selecionar Arquivo</CardTitle>
             <CardDescription>
               Faça upload da sua planilha Excel (.xlsx) ou CSV
             </CardDescription>
@@ -354,6 +430,7 @@ export default function ImportPage() {
                 accept=".xlsx,.xls,.csv"
                 onChange={handleFileSelect}
                 className="hidden"
+                aria-label="Selecionar arquivo Excel ou CSV"
               />
               
               {selectedFile ? (
@@ -375,13 +452,18 @@ export default function ImportPage() {
                     </Button>
                     <Button 
                       onClick={processFile} 
-                      disabled={isProcessing}
+                      disabled={isProcessing || !selectedCondominium}
                       size="sm"
                     >
                       {isProcessing ? (
                         <>
                           <Clock className="h-4 w-4 mr-2 animate-spin" />
                           Processando...
+                        </>
+                      ) : !selectedCondominium ? (
+                        <>
+                          <Building2 className="h-4 w-4 mr-2" />
+                          Selecione um Condomínio
                         </>
                       ) : (
                         <>
@@ -417,7 +499,7 @@ export default function ImportPage() {
         {validationResult && (
           <Card>
             <CardHeader>
-              <CardTitle>2. Resultado da Validação</CardTitle>
+              <CardTitle>3. Resultado da Validação</CardTitle>
               <CardDescription>
                 Verificação dos dados importados
               </CardDescription>
@@ -529,7 +611,7 @@ export default function ImportPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Bell className="h-5 w-5" />
-                3. Configurar Alertas de Vencimento
+                4. Configurar Alertas de Vencimento
               </CardTitle>
               <CardDescription>
                 Configure como você deseja receber os alertas quando os serviços estiverem próximos do vencimento
@@ -550,6 +632,7 @@ export default function ImportPage() {
                     value={notificationSettings.daysBeforeExpiry}
                     onChange={(e) => handleNotificationChange('daysBeforeExpiry', parseInt(e.target.value))}
                     className="w-20 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    aria-label="Dias antes do vencimento para enviar alerta"
                   />
                   <span className="text-sm text-muted-foreground">dias antes do vencimento</span>
                 </div>
@@ -577,6 +660,7 @@ export default function ImportPage() {
                         checked={notificationSettings.whatsapp}
                         onChange={() => {}} // Controlado pelo onClick do div
                         className="rounded"
+                        aria-label="Ativar notificações via WhatsApp"
                       />
                     </div>
                     <h4 className="font-medium">WhatsApp</h4>
@@ -605,6 +689,7 @@ export default function ImportPage() {
                         checked={notificationSettings.sms}
                         onChange={() => {}} // Controlado pelo onClick do div
                         className="rounded"
+                        aria-label="Ativar notificações via SMS"
                       />
                     </div>
                     <h4 className="font-medium">SMS</h4>
@@ -633,6 +718,7 @@ export default function ImportPage() {
                         checked={notificationSettings.telegram}
                         onChange={() => {}} // Controlado pelo onClick do div
                         className="rounded"
+                        aria-label="Ativar notificações via Telegram"
                       />
                     </div>
                     <h4 className="font-medium">Telegram</h4>
@@ -661,6 +747,7 @@ export default function ImportPage() {
                         checked={notificationSettings.email}
                         onChange={() => {}} // Controlado pelo onClick do div
                         className="rounded"
+                        aria-label="Ativar notificações via Email"
                       />
                     </div>
                     <h4 className="font-medium">Email</h4>
@@ -698,11 +785,33 @@ export default function ImportPage() {
                   </p>
                   {(notificationSettings.sms) && (
                     <p className="text-yellow-600 dark:text-yellow-400">
-                      • Custo estimado: R$ {(validationResult.validRecords * 0.08).toFixed(2)} por mês (considerando 1 SMS por serviço)
+                      • Custo estimado: R$ {((validationResult?.validRecords || 0) * 0.08).toFixed(2)} por mês (considerando 1 SMS por serviço)
                     </p>
                   )}
                 </div>
               </div>
+
+              {/* Preview da Mensagem */}
+              {selectedCondominium && (
+                <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                  <h4 className="font-medium mb-3 flex items-center gap-2 text-blue-900 dark:text-blue-200">
+                    <MessageSquare className="h-4 w-4" />
+                    Preview da Mensagem de Alerta:
+                  </h4>
+                  <div className="bg-white dark:bg-gray-900 border rounded-lg p-3 text-sm">
+                    <div className="font-mono text-gray-800 dark:text-gray-200">
+                      🏢 <strong>Condomínio:</strong> {condominiums.find(c => c.id === selectedCondominium)?.name}<br/>
+                      📅 <strong>Data de Vencimento:</strong> 15/01/2024<br/>
+                      🔧 <strong>Serviço:</strong> Limpeza de Piscina<br/>
+                      <br/>
+                      ⚠️ Este serviço vence em {notificationSettings.daysBeforeExpiry} dias. Verifique se está tudo em ordem!
+                    </div>
+                  </div>
+                  <p className="text-xs text-blue-700 dark:text-blue-300 mt-2">
+                    * Esta mensagem será enviada pelos métodos selecionados para cada serviço próximo do vencimento
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
@@ -711,7 +820,7 @@ export default function ImportPage() {
         {validationResult && !importComplete && (
           <Card>
             <CardHeader>
-              <CardTitle>4. Confirmar Importação</CardTitle>
+              <CardTitle>5. Confirmar Importação</CardTitle>
               <CardDescription>
                 Revise as configurações e confirme a importação dos dados
               </CardDescription>
@@ -776,11 +885,14 @@ export default function ImportPage() {
                     Importação Concluída!
                   </h3>
                   <p className="text-green-700 dark:text-green-300">
-                    {validationResult?.validRecords} registros foram importados com sucesso com alertas configurados.
+                    {validationResult?.validRecords} registros foram importados com sucesso para <strong>{condominiums.find(c => c.id === selectedCondominium)?.name}</strong> com alertas configurados.
                   </p>
                   <div className="mt-4 p-3 bg-green-100 dark:bg-green-900/20 rounded-lg">
                     <p className="text-sm text-green-800 dark:text-green-200">
-                      📱 Alertas configurados para: {
+                      🏢 <strong>Condomínio:</strong> {condominiums.find(c => c.id === selectedCondominium)?.name}
+                    </p>
+                    <p className="text-sm text-green-800 dark:text-green-200">
+                      📱 <strong>Alertas configurados para:</strong> {
                         [
                           notificationSettings.whatsapp && 'WhatsApp',
                           notificationSettings.sms && 'SMS', 
@@ -790,7 +902,10 @@ export default function ImportPage() {
                       }
                     </p>
                     <p className="text-sm text-green-800 dark:text-green-200 mt-1">
-                      🔔 Notificações {notificationSettings.daysBeforeExpiry} dias antes do vencimento
+                      🔔 <strong>Notificações:</strong> {notificationSettings.daysBeforeExpiry} dias antes do vencimento
+                    </p>
+                    <p className="text-sm text-green-800 dark:text-green-200 mt-1">
+                      📧 <strong>Formato da mensagem:</strong> Condomínio + Data + Serviço + Alerta de vencimento
                     </p>
                   </div>
                 </div>
