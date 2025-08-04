@@ -34,22 +34,7 @@ export function CreateCondominiumModal({ isOpen, onClose, onSuccess }: CreateCon
     description: ""
   })
 
-  const handleInputChange = (field: keyof CreateCondominiumInput, value: string | number) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    const result = await handleCreateCondominium(formData)
-    
-    if (result.success) {
-      handleClose()
-      onSuccess()
-    }
-  }
-
-  const handleClose = () => {
+  const resetForm = () => {
     setFormData({
       name: "",
       address: "",
@@ -65,6 +50,26 @@ export function CreateCondominiumModal({ isOpen, onClose, onSuccess }: CreateCon
       status: "active",
       description: ""
     })
+  }
+
+  const handleInputChange = (field: keyof CreateCondominiumInput, value: string | number) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    const result = await handleCreateCondominium(formData)
+    
+    if (result.success) {
+      resetForm()
+      onClose()
+      onSuccess()
+    }
+  }
+
+  const handleClose = () => {
+    resetForm()
     onClose()
   }
 

@@ -1,22 +1,22 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { 
-  Building2, 
-  Plus, 
-  Search, 
-  Filter, 
+import {
+  Building2,
+  Plus,
+  Search,
+  Filter,
   MoreHorizontal,
   Bed,
   Bath,
@@ -98,9 +98,13 @@ export default function ApartmentsPage() {
   const [selectedApartment, setSelectedApartment] = useState<ApartmentData | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  // Estado para apartamentos (agora controlado via estado local)
+  const [apartments, setApartments] = useState<ApartmentData[]>([]);
 
   // Dados simulados de apartamentos baseados nos condomínios reais
-  const allApartments: ApartmentData[] = [
+  const initialApartments: ApartmentData[] = [
     {
       id: 1,
       number: "101",
@@ -158,80 +162,80 @@ export default function ApartmentsPage() {
       area: 120.0,
       status: "Ocupado",
       type: "Premium",
-      residents: 3,
-      owner: "Ana Carolina Mendes",
-      ownerPhone: "(21) 99887-6543",
-      ownerEmail: "ana.mendes@email.com",
+      residents: 5,
+      owner: "Ana Paula Oliveira",
+      ownerPhone: "(21) 99876-5432",
+      ownerEmail: "ana.oliveira@email.com",
       monthlyFee: 1200.00,
       balanceDue: 0,
       lastPayment: "2024-11-15",
-      observations: "Cobertura com vista para o mar"
+      observations: "Apartamento com vista para o mar"
     },
     {
       id: 4,
-      number: "102",
+      number: "403",
       block: "A",
-      floor: 1,
+      floor: 4,
       condominium: "Condomínio Praia Azul",
       condominiumId: 3,
-      bedrooms: 3,
+      bedrooms: 2,
       bathrooms: 2,
       parkingSpaces: 1,
-      area: 90.0,
-      status: "Ocupado",
+      area: 75.0,
+      status: "Manutenção",
       type: "Padrão",
-      residents: 2,
-      owner: "Carlos Eduardo Silva",
-      ownerPhone: "(21) 98876-5432",
-      ownerEmail: "carlos.silva@email.com",
-      monthlyFee: 950.00,
-      balanceDue: 950.00,
+      residents: 0,
+      owner: "Carlos Eduardo Santos",
+      ownerPhone: "(21) 98321-4567",
+      ownerEmail: "carlos.santos@email.com",
+      monthlyFee: 720.00,
+      balanceDue: 720.00,
       lastPayment: "2024-10-15",
-      observations: "Apartamento com varanda gourmet"
+      observations: "Em reforma da cozinha"
     },
     {
       id: 5,
-      number: "501",
-      block: "C",
-      floor: 5,
+      number: "1001",
+      block: "A",
+      floor: 10,
       condominium: "Condomínio Cachoeira Dourada",
       condominiumId: 4,
       bedrooms: 3,
-      bathrooms: 2,
+      bathrooms: 3,
       parkingSpaces: 2,
-      area: 95.0,
+      area: 110.0,
       status: "Ocupado",
       type: "Premium",
-      residents: 5,
-      owner: "Fernanda Oliveira Santos",
-      ownerPhone: "(21) 97765-4321",
-      ownerEmail: "fernanda.santos@email.com",
-      monthlyFee: 1100.00,
+      residents: 3,
+      owner: "Fernanda Costa Lima",
+      ownerPhone: "(21) 99654-7890",
+      ownerEmail: "fernanda.lima@email.com",
+      monthlyFee: 980.00,
       balanceDue: 0,
       lastPayment: "2024-11-15",
-      observations: "Apartamento com 2 suítes"
+      observations: "Apartamento com sacada gourmet"
     },
     {
       id: 6,
-      number: "203",
+      number: "205",
       block: "B",
       floor: 2,
       condominium: "Condomínio Recanto",
       condominiumId: 5,
-      bedrooms: 2,
+      bedrooms: 1,
       bathrooms: 1,
       parkingSpaces: 1,
-      area: 70.0,
+      area: 45.0,
       status: "Vago",
       type: "Compacto",
       residents: 0,
-      owner: "Roberto Almeida Costa",
-      ownerPhone: "(21) 96654-3210",
-      ownerEmail: "roberto.costa@email.com",
-      monthlyFee: 750.00,
-      balanceDue: 2250.00,
-      lastPayment: "2024-08-15",
-      observations: "Necessita pequenos reparos"
+      owner: "Roberto Silva Nunes",
+      ownerPhone: "(21) 98147-2583",
+      ownerEmail: "roberto.nunes@email.com",
+      monthlyFee: 450.00,
+      balanceDue: 900.00,
+      lastPayment: "2024-09-15",
+      observations: "Ideal para solteiros"
     },
     {
       id: 7,
@@ -279,6 +283,11 @@ export default function ApartmentsPage() {
     }
   ];
 
+  // useEffect para inicializar os dados
+  useEffect(() => {
+    setApartments(initialApartments);
+  }, []);
+
   // Funções para modais
   const openViewModal = (apartment: ApartmentData) => {
     setSelectedApartment(apartment);
@@ -290,28 +299,59 @@ export default function ApartmentsPage() {
     setIsEditModalOpen(true);
   };
 
+  const openCreateModal = () => {
+    setSelectedApartment(null);
+    setIsCreateModalOpen(true);
+  };
+
   const closeModals = () => {
     setSelectedApartment(null);
     setIsViewModalOpen(false);
     setIsEditModalOpen(false);
+    setIsCreateModalOpen(false);
   };
 
-  // Funções para ações
+  // Funções CRUD
+  const handleCreateApartment = (apartmentData: Omit<ApartmentData, 'id'>) => {
+    const newId = Math.max(...apartments.map(apt => apt.id)) + 1;
+    const newApartment: ApartmentData = {
+      ...apartmentData,
+      id: newId
+    };
+    setApartments(prev => [...prev, newApartment]);
+    closeModals();
+  };
+
+  const handleUpdateApartment = (apartmentData: ApartmentData) => {
+    setApartments(prev => prev.map(apt => 
+      apt.id === apartmentData.id ? apartmentData : apt
+    ));
+    closeModals();
+  };
+
   const handleDeleteApartment = (apartment: ApartmentData) => {
     if (confirm(`Tem certeza que deseja excluir o apartamento ${apartment.number}?`)) {
-      // TODO: Implementar exclusão via action
-      console.log('Excluindo apartamento:', apartment.id);
+      setApartments(prev => prev.filter(apt => apt.id !== apartment.id));
     }
   };
 
   const handleDuplicateApartment = (apartment: ApartmentData) => {
-    // TODO: Implementar duplicação via action
-    console.log('Duplicando apartamento:', apartment.id);
+    const newId = Math.max(...apartments.map(apt => apt.id)) + 1;
+    const duplicatedApartment: ApartmentData = {
+      ...apartment,
+      id: newId,
+      number: `${apartment.number}_COPIA`,
+      status: "Vago",
+      residents: 0,
+      balanceDue: 0,
+      observations: `${apartment.observations} (Cópia)`
+    };
+    setApartments(prev => [...prev, duplicatedApartment]);
   };
 
   // Lógica de filtragem
   const filteredApartments = useMemo(() => {
-    return allApartments.filter(apartment => {
+    return apartments.filter((apartment: ApartmentData) => {
       // Filtro de pesquisa por texto
       if (filters.search) {
         const searchLower = filters.search.toLowerCase();
@@ -349,7 +389,7 @@ export default function ApartmentsPage() {
 
       return true;
     });
-  }, [allApartments, filters]);
+  }, [apartments, filters]);
 
   // Funções para manipular filtros
   const handleSearchChange = (value: string) => {
@@ -420,16 +460,30 @@ export default function ApartmentsPage() {
   };
 
   // Estatísticas
-  const totalApartments = allApartments.length;
-  const occupiedApartments = allApartments.filter(apt => apt.status === "Ocupado").length;
-  const vacantApartments = allApartments.filter(apt => apt.status === "Vago").length;
-  const occupancyRate = ((occupiedApartments / totalApartments) * 100).toFixed(1);
-  const totalMonthlyFees = allApartments.reduce((sum, apt) => sum + apt.monthlyFee, 0);
-  const totalBalanceDue = allApartments.reduce((sum, apt) => sum + apt.balanceDue, 0);
+  const totalApartments = apartments.length;
+  const occupiedApartments = apartments.filter((apt: ApartmentData) => apt.status === "Ocupado").length;
+  const vacantApartments = apartments.filter((apt: ApartmentData) => apt.status === "Vago").length;
+  const occupancyRate = totalApartments > 0 ? ((occupiedApartments / totalApartments) * 100).toFixed(1) : '0';
+  const totalMonthlyFees = apartments.reduce((sum: number, apt: ApartmentData) => sum + apt.monthlyFee, 0);
+  const totalBalanceDue = apartments.reduce((sum: number, apt: ApartmentData) => sum + apt.balanceDue, 0);
 
   return (
     <ContentLayout title="Apartamentos">
       <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Apartamentos</h1>
+            <p className="text-muted-foreground mt-1">
+              Gerencie os apartamentos dos condomínios
+            </p>
+          </div>
+          <Button className="flex items-center gap-2" onClick={openCreateModal}>
+            <Plus className="h-4 w-4" />
+            Novo Apartamento
+          </Button>
+        </div>
+
         {/* Estatísticas */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
@@ -480,7 +534,7 @@ export default function ApartmentsPage() {
             <CardContent>
               <div className="text-2xl font-bold">{formatCurrency(totalBalanceDue)}</div>
               <p className="text-xs text-muted-foreground">
-                {allApartments.filter(apt => apt.balanceDue > 0).length} inadimplentes
+                {apartments.filter((apt: ApartmentData) => apt.balanceDue > 0).length} inadimplentes
               </p>
             </CardContent>
           </Card>
@@ -628,11 +682,6 @@ export default function ApartmentsPage() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-              
-              <Button className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                Novo Apartamento
-              </Button>
             </div>
           </CardHeader>
         </Card>
@@ -644,9 +693,9 @@ export default function ApartmentsPage() {
               <div>
                 <CardTitle>Lista de Apartamentos</CardTitle>
                 <CardDescription>
-                  {filteredApartments.length === allApartments.length 
-                    ? `${allApartments.length} apartamentos cadastrados no sistema`
-                    : `${filteredApartments.length} de ${allApartments.length} apartamentos`
+                  {filteredApartments.length === apartments.length 
+                    ? `${apartments.length} apartamentos cadastrados no sistema`
+                    : `${filteredApartments.length} de ${apartments.length} apartamentos`
                   }
                 </CardDescription>
               </div>
@@ -661,7 +710,7 @@ export default function ApartmentsPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {filteredApartments.map((apartment) => (
+              {filteredApartments.map((apartment: ApartmentData) => (
                 <div
                   key={apartment.id}
                   className="flex flex-col lg:flex-row lg:items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors dark:border-border"
@@ -945,190 +994,513 @@ export default function ApartmentsPage() {
 
       {/* Modal de Edição */}
       {isEditModalOpen && selectedApartment && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-background rounded-lg p-6 w-full max-w-3xl mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold">Editar Apartamento</h2>
-              <Button variant="ghost" onClick={closeModals}>
-                <XCircle className="h-5 w-5" />
-              </Button>
-            </div>
-            
-            <form className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Número</label>
-                  <input 
-                    type="text"
-                    defaultValue={selectedApartment.number}
-                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Bloco</label>
-                  <input 
-                    type="text"
-                    defaultValue={selectedApartment.block}
-                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                  />
-                </div>
-              </div>
+        <ApartmentEditModal
+          apartment={selectedApartment}
+          onSave={handleUpdateApartment}
+          onClose={closeModals}
+        />
+      )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Status</label>
-                  <select 
-                    defaultValue={selectedApartment.status}
-                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                  >
-                    <option value="Ocupado">Ocupado</option>
-                    <option value="Vago">Vago</option>
-                    <option value="Manutenção">Manutenção</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Tipo</label>
-                  <select 
-                    defaultValue={selectedApartment.type}
-                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                  >
-                    <option value="Luxo">Luxo</option>
-                    <option value="Premium">Premium</option>
-                    <option value="Padrão">Padrão</option>
-                    <option value="Compacto">Compacto</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Quartos</label>
-                  <input 
-                    type="number"
-                    defaultValue={selectedApartment.bedrooms}
-                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Banheiros</label>
-                  <input 
-                    type="number"
-                    defaultValue={selectedApartment.bathrooms}
-                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Vagas</label>
-                  <input 
-                    type="number"
-                    defaultValue={selectedApartment.parkingSpaces}
-                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Área (m²)</label>
-                  <input 
-                    type="number"
-                    step="0.1"
-                    defaultValue={selectedApartment.area}
-                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Andar</label>
-                  <input 
-                    type="number"
-                    defaultValue={selectedApartment.floor}
-                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Número de Moradores</label>
-                  <input 
-                    type="number"
-                    defaultValue={selectedApartment.residents}
-                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium mb-2 block">Proprietário</label>
-                <input 
-                  type="text"
-                  defaultValue={selectedApartment.owner}
-                  className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Telefone</label>
-                  <input 
-                    type="text"
-                    defaultValue={selectedApartment.ownerPhone}
-                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Email</label>
-                  <input 
-                    type="email"
-                    defaultValue={selectedApartment.ownerEmail}
-                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Taxa Mensal</label>
-                  <input 
-                    type="number"
-                    step="0.01"
-                    defaultValue={selectedApartment.monthlyFee}
-                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Saldo Devedor</label>
-                  <input 
-                    type="number"
-                    step="0.01"
-                    defaultValue={selectedApartment.balanceDue}
-                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium mb-2 block">Observações</label>
-                <textarea 
-                  defaultValue={selectedApartment.observations}
-                  rows={3}
-                  className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                />
-              </div>
-            </form>
-            
-            <div className="flex justify-end space-x-2 mt-6">
-              <Button variant="outline" onClick={closeModals}>
-                Cancelar
-              </Button>
-              <Button onClick={() => {
-                // TODO: Implementar salvamento via action
-                console.log('Salvando apartamento editado');
-                closeModals();
-              }}>
-                Salvar Alterações
-              </Button>
-            </div>
-          </div>
-        </div>
+      {/* Modal de Criação */}
+      {isCreateModalOpen && (
+        <ApartmentCreateModal
+          onSave={handleCreateApartment}
+          onClose={closeModals}
+        />
       )}
     </ContentLayout>
+  );
+}
+
+// Componente Modal de Criação
+interface ApartmentCreateModalProps {
+  onSave: (apartment: Omit<ApartmentData, 'id'>) => void;
+  onClose: () => void;
+}
+
+function ApartmentCreateModal({ onSave, onClose }: ApartmentCreateModalProps) {
+  const [formData, setFormData] = useState({
+    number: "",
+    block: "",
+    floor: 1,
+    condominium: "",
+    condominiumId: 1,
+    bedrooms: 1,
+    bathrooms: 1,
+    parkingSpaces: 1,
+    area: 0,
+    status: "Vago" as const,
+    type: "Padrão" as const,
+    residents: 0,
+    owner: "",
+    ownerPhone: "",
+    ownerEmail: "",
+    monthlyFee: 0,
+    balanceDue: 0,
+    lastPayment: new Date().toISOString().split('T')[0],
+    observations: ""
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  const handleChange = (field: string, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-background rounded-lg p-6 w-full max-w-3xl mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold">Novo Apartamento</h2>
+          <Button variant="ghost" onClick={onClose}>
+            <XCircle className="h-5 w-5" />
+          </Button>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Número *</label>
+              <input 
+                type="text"
+                required
+                value={formData.number}
+                onChange={(e) => handleChange('number', e.target.value)}
+                className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                placeholder="Ex: 101"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Bloco *</label>
+              <input 
+                type="text"
+                required
+                value={formData.block}
+                onChange={(e) => handleChange('block', e.target.value)}
+                className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                placeholder="Ex: A"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Condomínio *</label>
+              <select 
+                required
+                value={formData.condominium}
+                onChange={(e) => {
+                  const selectedIndex = FILTER_OPTIONS.condominium.indexOf(e.target.value);
+                  handleChange('condominium', e.target.value);
+                  handleChange('condominiumId', selectedIndex + 1);
+                }}
+                className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="">Selecione um condomínio</option>
+                {FILTER_OPTIONS.condominium.map((cond, index) => (
+                  <option key={index} value={cond}>{cond}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Status</label>
+              <select 
+                value={formData.status}
+                onChange={(e) => handleChange('status', e.target.value)}
+                className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="Ocupado">Ocupado</option>
+                <option value="Vago">Vago</option>
+                <option value="Manutenção">Manutenção</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Tipo</label>
+              <select 
+                value={formData.type}
+                onChange={(e) => handleChange('type', e.target.value)}
+                className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="Luxo">Luxo</option>
+                <option value="Premium">Premium</option>
+                <option value="Padrão">Padrão</option>
+                <option value="Compacto">Compacto</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Andar *</label>
+              <input 
+                type="number"
+                required
+                min="1"
+                value={formData.floor}
+                onChange={(e) => handleChange('floor', parseInt(e.target.value))}
+                className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Quartos</label>
+              <input 
+                type="number"
+                min="1"
+                value={formData.bedrooms}
+                onChange={(e) => handleChange('bedrooms', parseInt(e.target.value))}
+                className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Banheiros</label>
+              <input 
+                type="number"
+                min="1"
+                value={formData.bathrooms}
+                onChange={(e) => handleChange('bathrooms', parseInt(e.target.value))}
+                className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Vagas</label>
+              <input 
+                type="number"
+                min="0"
+                value={formData.parkingSpaces}
+                onChange={(e) => handleChange('parkingSpaces', parseInt(e.target.value))}
+                className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Área (m²) *</label>
+              <input 
+                type="number"
+                step="0.1"
+                min="1"
+                required
+                value={formData.area}
+                onChange={(e) => handleChange('area', parseFloat(e.target.value))}
+                className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium mb-2 block">Proprietário *</label>
+            <input 
+              type="text"
+              required
+              value={formData.owner}
+              onChange={(e) => handleChange('owner', e.target.value)}
+              className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+              placeholder="Nome completo do proprietário"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Telefone</label>
+              <input 
+                type="text"
+                value={formData.ownerPhone}
+                onChange={(e) => handleChange('ownerPhone', e.target.value)}
+                className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                placeholder="(21) 99999-9999"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Email</label>
+              <input 
+                type="email"
+                value={formData.ownerEmail}
+                onChange={(e) => handleChange('ownerEmail', e.target.value)}
+                className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                placeholder="email@exemplo.com"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Taxa Mensal (R$) *</label>
+              <input 
+                type="number"
+                step="0.01"
+                min="0"
+                required
+                value={formData.monthlyFee}
+                onChange={(e) => handleChange('monthlyFee', parseFloat(e.target.value))}
+                className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Saldo Devedor (R$)</label>
+              <input 
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.balanceDue}
+                onChange={(e) => handleChange('balanceDue', parseFloat(e.target.value))}
+                className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Moradores</label>
+              <input 
+                type="number"
+                min="0"
+                value={formData.residents}
+                onChange={(e) => handleChange('residents', parseInt(e.target.value))}
+                className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium mb-2 block">Observações</label>
+            <textarea 
+              value={formData.observations}
+              onChange={(e) => handleChange('observations', e.target.value)}
+              rows={3}
+              className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+              placeholder="Observações sobre o apartamento..."
+            />
+          </div>
+          
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancelar
+            </Button>
+            <Button type="submit">
+              Criar Apartamento
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// Componente Modal de Edição
+interface ApartmentEditModalProps {
+  apartment: ApartmentData;
+  onSave: (apartment: ApartmentData) => void;
+  onClose: () => void;
+}
+
+function ApartmentEditModal({ apartment, onSave, onClose }: ApartmentEditModalProps) {
+  const [formData, setFormData] = useState<ApartmentData>(apartment);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  const handleChange = (field: string, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-background rounded-lg p-6 w-full max-w-3xl mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold">Editar Apartamento</h2>
+          <Button variant="ghost" onClick={onClose}>
+            <XCircle className="h-5 w-5" />
+          </Button>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Número</label>
+              <input 
+                type="text"
+                value={formData.number}
+                onChange={(e) => handleChange('number', e.target.value)}
+                className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Bloco</label>
+              <input 
+                type="text"
+                value={formData.block}
+                onChange={(e) => handleChange('block', e.target.value)}
+                className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Status</label>
+              <select 
+                value={formData.status}
+                onChange={(e) => handleChange('status', e.target.value)}
+                className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="Ocupado">Ocupado</option>
+                <option value="Vago">Vago</option>
+                <option value="Manutenção">Manutenção</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Tipo</label>
+              <select 
+                value={formData.type}
+                onChange={(e) => handleChange('type', e.target.value)}
+                className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="Luxo">Luxo</option>
+                <option value="Premium">Premium</option>
+                <option value="Padrão">Padrão</option>
+                <option value="Compacto">Compacto</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Quartos</label>
+              <input 
+                type="number"
+                value={formData.bedrooms}
+                onChange={(e) => handleChange('bedrooms', parseInt(e.target.value))}
+                className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Banheiros</label>
+              <input 
+                type="number"
+                value={formData.bathrooms}
+                onChange={(e) => handleChange('bathrooms', parseInt(e.target.value))}
+                className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Vagas</label>
+              <input 
+                type="number"
+                value={formData.parkingSpaces}
+                onChange={(e) => handleChange('parkingSpaces', parseInt(e.target.value))}
+                className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Área (m²)</label>
+              <input 
+                type="number"
+                step="0.1"
+                value={formData.area}
+                onChange={(e) => handleChange('area', parseFloat(e.target.value))}
+                className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Andar</label>
+              <input 
+                type="number"
+                value={formData.floor}
+                onChange={(e) => handleChange('floor', parseInt(e.target.value))}
+                className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Número de Moradores</label>
+              <input 
+                type="number"
+                value={formData.residents}
+                onChange={(e) => handleChange('residents', parseInt(e.target.value))}
+                className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium mb-2 block">Proprietário</label>
+            <input 
+              type="text"
+              value={formData.owner}
+              onChange={(e) => handleChange('owner', e.target.value)}
+              className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Telefone</label>
+              <input 
+                type="text"
+                value={formData.ownerPhone}
+                onChange={(e) => handleChange('ownerPhone', e.target.value)}
+                className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Email</label>
+              <input 
+                type="email"
+                value={formData.ownerEmail}
+                onChange={(e) => handleChange('ownerEmail', e.target.value)}
+                className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Taxa Mensal</label>
+              <input 
+                type="number"
+                step="0.01"
+                value={formData.monthlyFee}
+                onChange={(e) => handleChange('monthlyFee', parseFloat(e.target.value))}
+                className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Saldo Devedor</label>
+              <input 
+                type="number"
+                step="0.01"
+                value={formData.balanceDue}
+                onChange={(e) => handleChange('balanceDue', parseFloat(e.target.value))}
+                className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium mb-2 block">Observações</label>
+            <textarea 
+              value={formData.observations}
+              onChange={(e) => handleChange('observations', e.target.value)}
+              rows={3}
+              className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+          </div>
+          
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancelar
+            </Button>
+            <Button type="submit">
+              Salvar Alterações
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }

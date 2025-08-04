@@ -1,7 +1,36 @@
+"use client";
+
+import { useState } from "react";
 import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { 
   Users, 
   Plus, 
@@ -14,12 +43,36 @@ import {
   UserPlus,
   Edit,
   Shield,
-  User
+  User,
+  X,
+  Save,
+  Trash2
 } from "lucide-react";
 
 export default function ResidentsPage() {
+  // Estados para controle do formulário e filtros
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [apartmentFilter, setApartmentFilter] = useState("");
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  
+  // Estado para o formulário de cadastro
+  const [newResident, setNewResident] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    apartment: "",
+    block: "",
+    role: "",
+    status: "Ativo",
+    cpf: "",
+    birthDate: ""
+  });
+
   // Dados simulados - substituir por dados reais da API
-  const residents = [
+  const [residents, setResidents] = useState([
     {
       id: 1,
       name: "Maria Silva",
@@ -90,7 +143,58 @@ export default function ResidentsPage() {
       birthDate: "1995-11-30",
       createdAt: "2023-01-05"
     }
-  ];
+  ]);
+
+  // Função para adicionar novo morador
+  const handleAddResident = () => {
+    if (!newResident.name || !newResident.apartment || !newResident.role) {
+      alert("Por favor, preencha os campos obrigatórios.");
+      return;
+    }
+
+    const resident = {
+      id: residents.length + 1,
+      ...newResident,
+      avatar: null,
+      createdAt: new Date().toISOString().split('T')[0]
+    };
+
+    setResidents([...residents, resident]);
+    setNewResident({
+      name: "",
+      email: "",
+      phone: "",
+      apartment: "",
+      block: "",
+      role: "",
+      status: "Ativo",
+      cpf: "",
+      birthDate: ""
+    });
+    setShowAddModal(false);
+  };
+
+  // Função para filtrar moradores
+  const filteredResidents = residents.filter(resident => {
+    const matchesSearch = resident.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         resident.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         resident.apartment.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         resident.cpf.includes(searchTerm);
+    
+    const matchesStatus = statusFilter === "all" || resident.status === statusFilter;
+    const matchesRole = roleFilter === "all" || resident.role === roleFilter;
+    const matchesApartment = !apartmentFilter || resident.apartment.includes(apartmentFilter);
+    
+    return matchesSearch && matchesStatus && matchesRole && matchesApartment;
+  });
+
+  // Função para limpar filtros
+  const clearFilters = () => {
+    setSearchTerm("");
+    setStatusFilter("all");
+    setRoleFilter("all");
+    setApartmentFilter("");
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -131,10 +235,10 @@ export default function ResidentsPage() {
     }
   };
 
-  const activeResidents = residents.filter(r => r.status === "Ativo");
-  const totalResidents = residents.length;
-  const proprietarios = residents.filter(r => r.role === "Proprietário").length;
-  const inquilinos = residents.filter(r => r.role === "Inquilino").length;
+  const activeResidents = filteredResidents.filter(r => r.status === "Ativo");
+  const totalResidents = filteredResidents.length;
+  const proprietarios = filteredResidents.filter(r => r.role === "Proprietário").length;
+  const inquilinos = filteredResidents.filter(r => r.role === "Inquilino").length;
 
   return (
     <ContentLayout title="Moradores">
@@ -187,7 +291,7 @@ export default function ResidentsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-orange-600">
-                {residents.filter(r => r.role === "Dependente").length}
+                {filteredResidents.filter(r => r.role === "Dependente").length}
               </div>
               <p className="text-xs text-muted-foreground">
                 Menores e familiares
@@ -206,31 +310,246 @@ export default function ResidentsPage() {
                   Visualize e gerencie todos os moradores do condomínio
                 </CardDescription>
               </div>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Novo Morador
-              </Button>
+              <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Novo Morador
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Cadastrar Novo Morador</DialogTitle>
+                    <DialogDescription>
+                      Preencha as informações do novo morador do condomínio.
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="name">Nome Completo *</Label>
+                        <Input
+                          id="name"
+                          value={newResident.name}
+                          onChange={(e) => setNewResident({...newResident, name: e.target.value})}
+                          placeholder="Nome completo"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="cpf">CPF</Label>
+                        <Input
+                          id="cpf"
+                          value={newResident.cpf}
+                          onChange={(e) => setNewResident({...newResident, cpf: e.target.value})}
+                          placeholder="000.000.000-00"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          value={newResident.email}
+                          onChange={(e) => setNewResident({...newResident, email: e.target.value})}
+                          placeholder="email@exemplo.com"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="phone">Telefone</Label>
+                        <Input
+                          id="phone"
+                          value={newResident.phone}
+                          onChange={(e) => setNewResident({...newResident, phone: e.target.value})}
+                          placeholder="(11) 99999-9999"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="apartment">Apartamento *</Label>
+                        <Input
+                          id="apartment"
+                          value={newResident.apartment}
+                          onChange={(e) => setNewResident({...newResident, apartment: e.target.value})}
+                          placeholder="101"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="block">Bloco</Label>
+                        <Input
+                          id="block"
+                          value={newResident.block}
+                          onChange={(e) => setNewResident({...newResident, block: e.target.value})}
+                          placeholder="A"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="role">Tipo *</Label>
+                        <Select value={newResident.role} onValueChange={(value) => setNewResident({...newResident, role: value})}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o tipo" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Proprietário">Proprietário</SelectItem>
+                            <SelectItem value="Inquilino">Inquilino</SelectItem>
+                            <SelectItem value="Dependente">Dependente</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="birthDate">Data de Nascimento</Label>
+                        <Input
+                          id="birthDate"
+                          type="date"
+                          value={newResident.birthDate}
+                          onChange={(e) => setNewResident({...newResident, birthDate: e.target.value})}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="status">Status</Label>
+                        <Select value={newResident.status} onValueChange={(value) => setNewResident({...newResident, status: value})}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Ativo">Ativo</SelectItem>
+                            <SelectItem value="Inativo">Inativo</SelectItem>
+                            <SelectItem value="Pendente">Pendente</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setShowAddModal(false)}>
+                      Cancelar
+                    </Button>
+                    <Button onClick={handleAddResident}>
+                      <Save className="h-4 w-4 mr-2" />
+                      Salvar Morador
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
           </CardHeader>
           <CardContent>
             <div className="flex items-center space-x-4 mb-6">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <input
+                <Input
                   type="text"
-                  placeholder="Buscar por nome, email, apartamento..."
-                  className="w-full pl-10 pr-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  placeholder="Buscar por nome, email, apartamento, CPF..."
+                  className="pl-10"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <Button variant="outline">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowFilters(!showFilters)}
+                className={showFilters ? "bg-primary text-primary-foreground" : ""}
+              >
                 <Filter className="h-4 w-4 mr-2" />
                 Filtros
+                {(statusFilter !== "all" || roleFilter !== "all" || apartmentFilter) && (
+                  <Badge variant="secondary" className="ml-2">
+                    {[statusFilter !== "all" ? 1 : 0, roleFilter !== "all" ? 1 : 0, apartmentFilter ? 1 : 0].reduce((a, b) => a + b, 0)}
+                  </Badge>
+                )}
               </Button>
+            </div>
+
+            {/* Filtros Avançados */}
+            {showFilters && (
+              <div className="bg-muted/50 p-4 rounded-lg mb-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-medium">Filtros Avançados</h3>
+                  <Button variant="ghost" size="sm" onClick={clearFilters}>
+                    <X className="h-4 w-4 mr-1" />
+                    Limpar
+                  </Button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label>Status</Label>
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todos os Status</SelectItem>
+                        <SelectItem value="Ativo">Ativo</SelectItem>
+                        <SelectItem value="Inativo">Inativo</SelectItem>
+                        <SelectItem value="Pendente">Pendente</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Tipo de Morador</Label>
+                    <Select value={roleFilter} onValueChange={setRoleFilter}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todos os Tipos</SelectItem>
+                        <SelectItem value="Proprietário">Proprietário</SelectItem>
+                        <SelectItem value="Inquilino">Inquilino</SelectItem>
+                        <SelectItem value="Dependente">Dependente</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Apartamento</Label>
+                    <Input
+                      placeholder="Filtrar por apartamento"
+                      value={apartmentFilter}
+                      onChange={(e) => setApartmentFilter(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Resultado dos Filtros */}
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm text-muted-foreground">
+                {filteredResidents.length === residents.length 
+                  ? `Exibindo todos os ${totalResidents} moradores`
+                  : `Exibindo ${filteredResidents.length} de ${residents.length} moradores`
+                }
+              </p>
+              {filteredResidents.length !== residents.length && (
+                <Button variant="ghost" size="sm" onClick={clearFilters}>
+                  Ver todos
+                </Button>
+              )}
             </div>
 
             {/* Lista de Moradores */}
             <div className="space-y-4">
-              {residents.map((resident) => (
+              {filteredResidents.length === 0 ? (
+                <div className="text-center py-8">
+                  <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-medium">Nenhum morador encontrado</h3>
+                  <p className="text-muted-foreground">
+                    {searchTerm || statusFilter !== "all" || roleFilter !== "all" || apartmentFilter
+                      ? "Tente ajustar os filtros de busca"
+                      : "Cadastre o primeiro morador do condomínio"
+                    }
+                  </p>
+                </div>
+              ) : (
+                filteredResidents.map((resident) => (
                 <div key={resident.id} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
@@ -284,13 +603,33 @@ export default function ResidentsPage() {
                       <Button variant="ghost" size="sm">
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="sm">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <Mail className="h-4 w-4 mr-2" />
+                            Enviar Email
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="text-red-600">
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Remover
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
                 </div>
-              ))}
+              ))
+              )}
             </div>
           </CardContent>
         </Card>

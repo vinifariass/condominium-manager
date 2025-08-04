@@ -36,42 +36,33 @@ export function CondominiumActionsMenu({
   onEdit, 
   onSuccess 
 }: CondominiumActionsMenuProps) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const { handleDeleteCondominium, loading } = useCondominiumActions()
 
-  const resetStates = () => {
-    setIsMenuOpen(false)
-    setIsDeleteDialogOpen(false)
-  }
-
   const handleView = () => {
     onView(condominium)
-    resetStates()
   }
 
   const handleEdit = () => {
     onEdit(condominium)
-    resetStates()
   }
 
   const handleDeleteClick = () => {
     setIsDeleteDialogOpen(true)
-    setIsMenuOpen(false)
   }
 
   const handleConfirmDelete = async () => {
     const result = await handleDeleteCondominium(condominium.id)
     
     if (result.success) {
-      resetStates()
+      setIsDeleteDialogOpen(false)
       onSuccess()
     }
   }
 
   return (
     <>
-      <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+      <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
             <span className="sr-only">Abrir menu</span>

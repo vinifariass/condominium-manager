@@ -12,12 +12,13 @@ import { EditCondominiumModal } from "@/components/edit-condominium-modal"
 import { ViewCondominiumModal } from "@/components/view-condominium-modal"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
+import { PermissionGuard } from "@/components/permission-guard"
 import { Condominium } from "@/lib/types/condominium"
 import { getCondominiums } from "@/lib/data/condominiums"
 import { useCondominiumActions } from "@/hooks/use-condominium-actions"
 import { Plus, Search, MoreHorizontal, Eye, Edit, Trash2, Building, MapPin, Users, Phone } from "lucide-react"
 
-export default function CondominiumsPage() {
+function CondominiumsPageContent() {
   const [condominiums, setCondominiums] = useState<Condominium[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
@@ -315,5 +316,29 @@ export default function CondominiumsPage() {
         </AlertDialogContent>
       </AlertDialog>
     </ContentLayout>
+  )
+}
+
+export default function CondominiumsPage() {
+  return (
+    <PermissionGuard 
+      permissions={["canManageCondominiums"]}
+      fallback={
+        <ContentLayout title="Acesso Negado">
+          <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
+            <Building className="h-16 w-16 text-muted-foreground mb-4" />
+            <h2 className="text-2xl font-semibold mb-2">Acesso Restrito</h2>
+            <p className="text-muted-foreground mb-4">
+              Você não tem permissão para gerenciar condomínios.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Entre em contato com o administrador do sistema para obter acesso.
+            </p>
+          </div>
+        </ContentLayout>
+      }
+    >
+      <CondominiumsPageContent />
+    </PermissionGuard>
   )
 }
