@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,15 +15,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Upload,
@@ -85,24 +76,6 @@ interface NotificationHistory {
   createdAt: string;
 }
 
-interface Contract {
-  id: string;
-  serviceId: string;
-  serviceName: string;
-  condominiumId: string;
-  condominiumName: string;
-  contractNumber: string;
-  startDate: string;
-  endDate: string;
-  value: number;
-  paymentFrequency: 'MONTHLY' | 'QUARTERLY' | 'YEARLY';
-  status: 'ACTIVE' | 'EXPIRED' | 'CANCELLED';
-  description: string | null;
-  daysToExpire?: number;
-  isExpiringSoon?: boolean;
-  isExpired?: boolean;
-}
-
 export default function ImportPage() {
   // Estados para importação
   const [selectedType, setSelectedType] = useState<string>("");
@@ -132,22 +105,12 @@ export default function ImportPage() {
   });
   const [sendingNotification, setSendingNotification] = useState(false);
 
-  // Estados para contratos e vencimentos
-  const [expiringContracts, setExpiringContracts] = useState<any[]>([]);
-  const [loadingContracts, setLoadingContracts] = useState(true);
-  const [contractNotifications, setContractNotifications] = useState<any[]>([]);
-  const [sendingContractNotification, setSendingContractNotification] = useState(false);
-
-  // Estados para modal de notificação
-  const [showNotificationModal, setShowNotificationModal] = useState(false);
-  const [currentNotificationType, setCurrentNotificationType] = useState('');
-  const [currentContractId, setCurrentContractId] = useState('');
-  const [notificationRecipients, setNotificationRecipients] = useState('');
-  const [isAllContracts, setIsAllContracts] = useState(false);
-
-  // Estados para condomínios
-  const [condominiums, setCondominiums] = useState<Array<{id: string; name: string}>>([]);
-  const [loadingCondominiums, setLoadingCondominiums] = useState(true);
+  // Mock data
+  const condominiums = [
+    { id: "1", name: "Condomínio Residencial Exemplo" },
+    { id: "2", name: "Edifício Central Plaza" },
+    { id: "3", name: "Residencial Jardins" }
+  ];
 
   const importTypes = [
     {
@@ -183,22 +146,13 @@ export default function ImportPage() {
     "Outros"
   ];
 
-  const loadCondominiums = useCallback(async () => {
-    try {
-      setLoadingCondominiums(true);
-      const response = await fetch('/api/condominiums');
-      if (response.ok) {
-        const result = await response.json();
-        setCondominiums(result.data || []);
-      }
-    } catch (error) {
-      console.error('Erro ao carregar condomínios:', error);
-    } finally {
-      setLoadingCondominiums(false);
-    }
+  // Carregar dados ao montar
+  useEffect(() => {
+    loadServices();
+    loadNotificationHistory();
   }, []);
 
-  const loadServices = useCallback(async () => {
+  const loadServices = async () => {
     try {
       setLoadingServices(true);
       const params = new URLSearchParams();
@@ -216,9 +170,9 @@ export default function ImportPage() {
     } finally {
       setLoadingServices(false);
     }
-  }, [serviceFilters]);
+  };
 
-  const loadNotificationHistory = useCallback(async () => {
+  const loadNotificationHistory = async () => {
     try {
       setLoadingNotifications(true);
       const response = await fetch('/api/notifications');
@@ -231,43 +185,7 @@ export default function ImportPage() {
     } finally {
       setLoadingNotifications(false);
     }
-  }, []);
-
-  const loadExpiringContracts = useCallback(async () => {
-    try {
-      setLoadingContracts(true);
-      const response = await fetch('/api/contracts?status=ACTIVE&daysToExpire=30');
-      if (response.ok) {
-        const data = await response.json();
-        setExpiringContracts(data);
-      }
-    } catch (error) {
-      console.error('Erro ao carregar contratos:', error);
-    } finally {
-      setLoadingContracts(false);
-    }
-  }, []);
-
-  const loadContractNotifications = useCallback(async () => {
-    try {
-      const response = await fetch('/api/contract-notifications');
-      if (response.ok) {
-        const data = await response.json();
-        setContractNotifications(data.notifications || []);
-      }
-    } catch (error) {
-      console.error('Erro ao carregar notificações de contrato:', error);
-    }
-  }, []);
-
-  // Carregar dados ao montar
-  useEffect(() => {
-    loadCondominiums();
-    loadServices();
-    loadNotificationHistory();
-    loadExpiringContracts();
-    loadContractNotifications();
-  }, [loadCondominiums, loadServices, loadNotificationHistory, loadExpiringContracts, loadContractNotifications]);
+  };
 
   // Funções de importação
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -370,143 +288,8 @@ export default function ImportPage() {
     }
   };
 
-  const handleSendContractNotification = async (contractId: string, notificationType: string, recipients: string) => {
-    if (!recipients.trim()) {
-      alert("Por favor, informe os destinatários.");
-      return;
-    }
-
-    setSendingContractNotification(true);
-    try {
-      const response = await fetch('/api/contract-notifications', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contractId,
-          notificationType,
-          recipients: recipients.split(',').map(r => r.trim())
-        }),
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success) {
-          alert(`✅ Notificação enviada com sucesso para o contrato ${result.contract.contractNumber}!`);
-        } else {
-          alert(`❌ ${result.message}`);
-        }
-        loadNotificationHistory();
-      } else {
-        const error = await response.json();
-        alert(`❌ ${error.error || 'Erro ao enviar notificação'}`);
-      }
-    } catch (error) {
-      console.error('Erro ao enviar notificação:', error);
-      alert('❌ Erro ao enviar notificação');
-    } finally {
-      setSendingContractNotification(false);
-    }
-  };
-
-  const handleSendAllContractNotifications = async (notificationType: string, recipients: string) => {
-    if (!recipients.trim()) {
-      alert("Por favor, informe os destinatários.");
-      return;
-    }
-
-    setSendingContractNotification(true);
-    try {
-      const response = await fetch('/api/contract-notifications', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          notificationType,
-          recipients: recipients.split(',').map(r => r.trim())
-        }),
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        alert(`✅ ${result.message}\n📊 Enviadas: ${result.sentNotifications}\n❌ Falhas: ${result.failedNotifications}`);
-        loadNotificationHistory();
-      } else {
-        const error = await response.json();
-        alert(`❌ ${error.error || 'Erro ao enviar notificações'}`);
-      }
-    } catch (error) {
-      console.error('Erro ao enviar notificações:', error);
-      alert('❌ Erro ao enviar notificações');
-    } finally {
-      setSendingContractNotification(false);
-    }
-  };
-
-  const openNotificationModal = (type: string, contractId: string = '', allContracts: boolean = false) => {
-    setCurrentNotificationType(type);
-    setCurrentContractId(contractId);
-    setIsAllContracts(allContracts);
-    setNotificationRecipients('');
-    setShowNotificationModal(true);
-  };
-
-  const handleModalNotificationSend = async () => {
-    if (!notificationRecipients.trim()) {
-      alert("Por favor, informe os destinatários.");
-      return;
-    }
-
-    setSendingContractNotification(true);
-    try {
-      if (isAllContracts) {
-        await handleSendAllContractNotifications(currentNotificationType, notificationRecipients);
-      } else {
-        await handleSendContractNotification(currentContractId, currentNotificationType, notificationRecipients);
-      }
-      setShowNotificationModal(false);
-      setNotificationRecipients('');
-    } catch (error) {
-      console.error('Erro ao enviar notificação:', error);
-    } finally {
-      setSendingContractNotification(false);
-    }
-  };
-
-  const downloadTemplate = async (type: string) => {
-    try {
-      const response = await fetch(`/api/templates?type=${type}`);
-      
-      if (!response.ok) {
-        const error = await response.json();
-        alert(error.error || 'Erro ao baixar template');
-        return;
-      }
-
-      // Criar blob e download
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      
-      // Nome do arquivo baseado no tipo
-      const typeNames = {
-        residents: 'moradores',
-        apartments: 'apartamentos',
-        services: 'servicos'
-      };
-      a.download = `template-${typeNames[type as keyof typeof typeNames] || type}.xlsx`;
-      
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error('Erro ao baixar template:', error);
-      alert('Erro ao baixar template');
-    }
+  const downloadTemplate = (templateName: string) => {
+    alert(`Download do template: ${templateName}`);
   };
 
   const getStatusBadge = (status: string) => {
@@ -542,11 +325,10 @@ export default function ImportPage() {
   return (
     <ContentLayout title="Importação e Serviços">
       <Tabs defaultValue="import" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="import">Importar Dados</TabsTrigger>
           <TabsTrigger value="services">Serviços</TabsTrigger>
           <TabsTrigger value="notifications">Notificações</TabsTrigger>
-          <TabsTrigger value="contracts">Vencimentos</TabsTrigger>
         </TabsList>
 
         {/* Aba de Importação */}
@@ -591,7 +373,7 @@ export default function ImportPage() {
                                 size="sm"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  downloadTemplate(type.value);
+                                  downloadTemplate(type.template);
                                 }}
                               >
                                 <Download className="h-4 w-4 mr-1" />
@@ -612,21 +394,11 @@ export default function ImportPage() {
                         <SelectValue placeholder="Selecione o condomínio" />
                       </SelectTrigger>
                       <SelectContent>
-                        {loadingCondominiums ? (
-                          <SelectItem value="loading" disabled>
-                            Carregando condomínios...
+                        {condominiums.map((condo) => (
+                          <SelectItem key={condo.id} value={condo.id}>
+                            {condo.name}
                           </SelectItem>
-                        ) : condominiums.length === 0 ? (
-                          <SelectItem value="empty" disabled>
-                            Nenhum condomínio encontrado
-                          </SelectItem>
-                        ) : (
-                          condominiums.map((condo) => (
-                            <SelectItem key={condo.id} value={condo.id}>
-                              {condo.name}
-                            </SelectItem>
-                          ))
-                        )}
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -767,7 +539,7 @@ export default function ImportPage() {
                       variant="outline" 
                       size="sm" 
                       className="w-full"
-                      onClick={() => downloadTemplate(selectedTypeInfo.value)}
+                      onClick={() => downloadTemplate(selectedTypeInfo.template)}
                     >
                       <FileDown className="h-4 w-4 mr-2" />
                       Baixar Template
@@ -788,7 +560,7 @@ export default function ImportPage() {
                       <li>Preencha os dados seguindo o formato</li>
                       <li>Selecione o tipo e condomínio</li>
                       <li>Faça upload do arquivo</li>
-                      <li>Clique em &quot;Iniciar Importação&quot;</li>
+                      <li>Clique em "Iniciar Importação"</li>
                     </ol>
                   </div>
                 </CardContent>
@@ -831,7 +603,7 @@ export default function ImportPage() {
                       <SelectValue placeholder="Todas as categorias" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">Todas as categorias</SelectItem>
+                      <SelectItem value="">Todas as categorias</SelectItem>
                       {serviceCategories.map((category) => (
                         <SelectItem key={category} value={category}>
                           {category}
@@ -1085,258 +857,7 @@ export default function ImportPage() {
             </Card>
           </div>
         </TabsContent>
-
-        {/* Aba Contratos e Vencimentos */}
-        <TabsContent value="contracts" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Contratos Próximos ao Vencimento */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
-                  Contratos Próximos ao Vencimento
-                </CardTitle>
-                <CardDescription>
-                  Contratos que vencem nos próximos 30 dias
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {loadingContracts ? (
-                  <div className="flex items-center justify-center p-8">
-                    <Loader2 className="h-8 w-8 animate-spin" />
-                    <span className="ml-2">Carregando contratos...</span>
-                  </div>
-                ) : expiringContracts.length === 0 ? (
-                  <div className="text-center p-8">
-                    <CheckCircle2 className="h-8 w-8 mx-auto text-green-500 mb-2" />
-                    <p className="text-muted-foreground">Nenhum contrato próximo ao vencimento</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {expiringContracts.map((contract) => (
-                      <div key={contract.id} className="border rounded-lg p-4">
-                        <div className="flex items-start justify-between mb-3">
-                          <div>
-                            <h4 className="font-medium">{contract.serviceName}</h4>
-                            <p className="text-sm text-muted-foreground">{contract.condominiumName}</p>
-                          </div>
-                          <div className="text-right">
-                            <Badge 
-                              variant={
-                                contract.daysToExpire <= 7 ? "destructive" :
-                                contract.daysToExpire <= 15 ? "secondary" : "outline"
-                              }
-                            >
-                              {contract.daysToExpire} dias
-                            </Badge>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4 text-sm mb-3">
-                          <div>
-                            <span className="text-muted-foreground">Contrato:</span>
-                            <p className="font-medium">{contract.contractNumber}</p>
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">Vencimento:</span>
-                            <p className="font-medium">{new Date(contract.endDate).toLocaleDateString('pt-BR')}</p>
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">Valor:</span>
-                            <p className="font-medium">R$ {contract.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">Frequência:</span>
-                            <p className="font-medium">
-                              {contract.paymentFrequency === 'MONTHLY' ? 'Mensal' :
-                               contract.paymentFrequency === 'QUARTERLY' ? 'Trimestral' : 'Anual'}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => openNotificationModal('WHATSAPP', contract.id)}
-                            disabled={sendingContractNotification}
-                          >
-                            <MessageSquare className="h-4 w-4 mr-1" />
-                            WhatsApp
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => openNotificationModal('SMS', contract.id)}
-                            disabled={sendingContractNotification}
-                          >
-                            <Smartphone className="h-4 w-4 mr-1" />
-                            SMS
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => openNotificationModal('TELEGRAM', contract.id)}
-                            disabled={sendingContractNotification}
-                          >
-                            <Send className="h-4 w-4 mr-1" />
-                            Telegram
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Notificações em Massa */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Bell className="h-5 w-5" />
-                  Notificações Automáticas
-                </CardTitle>
-                <CardDescription>
-                  Enviar notificações para todos os contratos próximos ao vencimento
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-3 gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => openNotificationModal('WHATSAPP', '', true)}
-                    disabled={sendingContractNotification}
-                    className="flex flex-col gap-1 h-auto py-3"
-                  >
-                    <MessageSquare className="h-5 w-5" />
-                    <span className="text-xs">WhatsApp</span>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => openNotificationModal('SMS', '', true)}
-                    disabled={sendingContractNotification}
-                    className="flex flex-col gap-1 h-auto py-3"
-                  >
-                    <Smartphone className="h-5 w-5" />
-                    <span className="text-xs">SMS</span>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => openNotificationModal('TELEGRAM', '', true)}
-                    disabled={sendingContractNotification}
-                    className="flex flex-col gap-1 h-auto py-3"
-                  >
-                    <Send className="h-5 w-5" />
-                    <span className="text-xs">Telegram</span>
-                  </Button>
-                </div>
-
-                <div className="border-t pt-4">
-                  <h4 className="font-medium mb-2">Resumo de Vencimentos</h4>
-                  <div className="grid grid-cols-3 gap-4 text-center">
-                    <div className="p-3 bg-red-50 rounded-lg">
-                      <div className="text-2xl font-bold text-red-600">
-                        {expiringContracts.filter(c => c.daysToExpire <= 7).length}
-                      </div>
-                      <div className="text-xs text-red-600">≤ 7 dias</div>
-                    </div>
-                    <div className="p-3 bg-yellow-50 rounded-lg">
-                      <div className="text-2xl font-bold text-yellow-600">
-                        {expiringContracts.filter(c => c.daysToExpire > 7 && c.daysToExpire <= 15).length}
-                      </div>
-                      <div className="text-xs text-yellow-600">8-15 dias</div>
-                    </div>
-                    <div className="p-3 bg-blue-50 rounded-lg">
-                      <div className="text-2xl font-bold text-blue-600">
-                        {expiringContracts.filter(c => c.daysToExpire > 15).length}
-                      </div>
-                      <div className="text-xs text-blue-600">16-30 dias</div>
-                    </div>
-                  </div>
-                </div>
-
-                <Button
-                  onClick={() => {
-                    loadExpiringContracts();
-                    loadContractNotifications();
-                  }}
-                  variant="outline"
-                  className="w-full"
-                >
-                  <Clock className="h-4 w-4 mr-2" />
-                  Atualizar Dados
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
       </Tabs>
-
-      {/* Modal para inserir destinatários */}
-      <Dialog open={showNotificationModal} onOpenChange={setShowNotificationModal}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>
-              Enviar Notificação por {
-                currentNotificationType === 'WHATSAPP' ? 'WhatsApp' :
-                currentNotificationType === 'SMS' ? 'SMS' : 'Telegram'
-              }
-            </DialogTitle>
-            <DialogDescription>
-              {isAllContracts 
-                ? 'Insira os destinatários para enviar notificações de todos os contratos próximos ao vencimento.'
-                : 'Insira os destinatários para este contrato específico.'
-              }
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="recipients">
-                {currentNotificationType === 'WHATSAPP' && 'Números do WhatsApp'}
-                {currentNotificationType === 'SMS' && 'Números de telefone'}
-                {currentNotificationType === 'TELEGRAM' && 'IDs do Telegram'}
-              </Label>
-              <Textarea
-                id="recipients"
-                placeholder={
-                  currentNotificationType === 'WHATSAPP' ? '+5511999999999, +5511888888888' :
-                  currentNotificationType === 'SMS' ? '+5511999999999, +5511888888888' :
-                  '@usuario1, @usuario2 ou ID1, ID2'
-                }
-                value={notificationRecipients}
-                onChange={(e) => setNotificationRecipients(e.target.value)}
-                rows={3}
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Separe múltiplos destinatários por vírgula
-              </p>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => setShowNotificationModal(false)}
-              disabled={sendingContractNotification}
-            >
-              Cancelar
-            </Button>
-            <Button 
-              onClick={handleModalNotificationSend}
-              disabled={sendingContractNotification || !notificationRecipients.trim()}
-            >
-              {sendingContractNotification ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Send className="h-4 w-4 mr-2" />
-              )}
-              {sendingContractNotification ? 'Enviando...' : 'Enviar'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </ContentLayout>
   );
 }

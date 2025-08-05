@@ -52,35 +52,51 @@ export async function createCondominium(data: CreateCondominiumInput) {
 
 export async function updateCondominium(data: UpdateCondominiumInput) {
   try {
+    console.log('🔄 [updateCondominium] Iniciando atualização com dados:', data);
+    
     // Validate required fields
     if (!data.id) {
+      console.log('❌ [updateCondominium] ID do condomínio é obrigatório');
       return {
         success: false,
         error: "ID do condomínio é obrigatório"
       }
     }
 
+    console.log('✅ [updateCondominium] Validação de ID passou');
+
     // Check if CNPJ is being changed and if it conflicts with another condominium
     if (data.cnpj) {
+      console.log('🔍 [updateCondominium] Verificando conflito de CNPJ...');
       const allCondominiums = await getCondominiums()
       const cnpjExists = allCondominiums.some(c => 
         c.cnpj === data.cnpj && c.id !== data.id
       )
 
       if (cnpjExists) {
+        console.log('❌ [updateCondominium] CNPJ já existe em outro condomínio');
         return {
           success: false,
           error: "Já existe um condomínio com este CNPJ"
         }
       }
+      console.log('✅ [updateCondominium] Verificação de CNPJ passou');
     }
 
     // Update the condominium
+    console.log('📝 [updateCondominium] Preparando dados para atualização...');
     const { id, ...updateData } = data
+    console.log('📝 [updateCondominium] ID:', id);
+    console.log('📝 [updateCondominium] Dados de atualização:', updateData);
+    
+    console.log('💾 [updateCondominium] Chamando updateCondominiumData...');
     const condominium = await updateCondominiumData(id, updateData)
+    console.log('✅ [updateCondominium] Condomínio atualizado:', condominium);
 
     // Revalidate the condominiums page
+    console.log('🔄 [updateCondominium] Revalidando cache...');
     revalidatePath("/condominiums")
+    console.log('✅ [updateCondominium] Cache revalidado');
 
     return {
       success: true,
@@ -88,7 +104,7 @@ export async function updateCondominium(data: UpdateCondominiumInput) {
       message: "Condomínio atualizado com sucesso!"
     }
   } catch (error) {
-    console.error("Error updating condominium:", error)
+    console.error('❌ [updateCondominium] Erro durante atualização:', error)
     return {
       success: false,
       error: "Erro interno do servidor. Tente novamente."

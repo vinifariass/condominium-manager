@@ -79,13 +79,6 @@ export function ViewCondominiumModal({ isOpen, onClose, condominium }: ViewCondo
                   <p className="text-sm">{condominium.cnpj || "Não informado"}</p>
                 </div>
               </div>
-              
-              {condominium.description && (
-                <div>
-                  <span className="text-sm font-medium text-gray-500">Descrição</span>
-                  <p className="text-sm">{condominium.description}</p>
-                </div>
-              )}
             </CardContent>
           </Card>
 

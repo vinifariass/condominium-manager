@@ -3,6 +3,7 @@
 import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { TestModalInteractions } from "@/components/demo/test-modal-interactions";
 import { useRouter } from "next/navigation";
 import { 
   Building2, 
@@ -112,6 +113,9 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Componente de Teste - Remover após validação */}
+        <TestModalInteractions />
 
         {/* Gráficos e Resumos */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

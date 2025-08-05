@@ -90,17 +90,26 @@ export async function createCondominium(data: Omit<Condominium, 'id' | 'createdA
 
 export async function updateCondominium(id: string, data: Partial<Omit<Condominium, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Condominium> {
   try {
+    console.log('🔧 [updateCondominiumData] Iniciando atualização no banco...');
+    console.log('🔧 [updateCondominiumData] ID:', id);
+    console.log('🔧 [updateCondominiumData] Dados recebidos:', data);
+    
     const updateData: any = { ...data }
     if (updateData.status) {
+      console.log('🔧 [updateCondominiumData] Convertendo status para uppercase:', updateData.status);
       updateData.status = updateData.status.toUpperCase()
     }
+    
+    console.log('🔧 [updateCondominiumData] Dados finais para o Prisma:', updateData);
     
     const condominium = await prisma.condominium.update({
       where: { id },
       data: updateData
     })
     
-    return {
+    console.log('✅ [updateCondominiumData] Condomínio atualizado no banco:', condominium);
+    
+    const result = {
       ...condominium,
       phone: condominium.phone || undefined,
       email: condominium.email || undefined,
@@ -113,8 +122,11 @@ export async function updateCondominium(id: string, data: Partial<Omit<Condomini
       totalUnits: condominium.totalUnits || 0,
       totalBlocks: condominium.totalBlocks || 0,
     }
+    
+    console.log('✅ [updateCondominiumData] Resultado formatado:', result);
+    return result;
   } catch (error) {
-    console.error('Error updating condominium:', error)
+    console.error('❌ [updateCondominiumData] Error updating condominium:', error)
     throw new Error('Failed to update condominium')
   }
 }

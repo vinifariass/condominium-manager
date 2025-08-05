@@ -2,6 +2,83 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Fix for Radix UI overlapping issues */
+[data-radix-popper-content-wrapper] {
+  z-index: 50 !important;
+}
+
+[data-radix-dropdown-menu-content] {
+  z-index: 50 !important;
+  pointer-events: auto !important;
+}
+
+[data-radix-dropdown-menu-trigger] {
+  z-index: 49 !important;
+}
+
+[data-radix-dialog-overlay] {
+  z-index: 50 !important;
+}
+
+[data-radix-dialog-content] {
+  z-index: 50 !important;
+}
+
+[data-radix-select-content] {
+  z-index: 1002 !important;
+}
+
+/* Additional fixes for modal interactions */
+[data-radix-dialog-content] [data-radix-select-trigger] {
+  z-index: 1003 !important;
+}
+
+[data-radix-dialog-content] [data-radix-select-content] {
+  z-index: 1004 !important;
+}
+
+[data-radix-dialog-content] button {
+  z-index: auto !important;
+}
+
+/* Fix for portal components */
+[data-radix-portal] {
+  z-index: 50 !important;
+}
+
+/* Ensure ONLY modals and overlays don't block background interactions when closed */
+[data-radix-dialog-overlay][data-state="closed"],
+[data-radix-alert-dialog-overlay][data-state="closed"] {
+  pointer-events: none !important;
+}
+
+[data-radix-dialog-overlay][data-state="open"],
+[data-radix-alert-dialog-overlay][data-state="open"] {
+  pointer-events: auto !important;
+}
+
+/* Ensure click events work properly */
+[data-radix-popper-content-wrapper],
+[data-radix-dropdown-menu-content],
+[data-radix-select-content] {
+  pointer-events: auto !important;
+}
+
+/* Specific fixes for dropdown menus */
+[data-radix-dropdown-menu-item] {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+[data-radix-dropdown-menu-trigger] {
+  pointer-events: auto !important;
+}
+
+/* Ensure dropdown works on cards */
+.hover\\:shadow-md [data-radix-dropdown-menu-content] {
+  z-index: 51 !important;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

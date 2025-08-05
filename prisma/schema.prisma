@@ -77,6 +77,8 @@ model User {
   posts         Post[]
   comments      Comment[]
   notifications Notification[]
+  notificationSends NotificationSend[]
+  importLogs    ImportLog[]
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -106,6 +108,9 @@ model Condominium {
   commonAreas CommonArea[]
   posts       Post[]
   tickets     Ticket[]
+  services    Service[]
+  notificationSends NotificationSend[]
+  importLogs  ImportLog[]
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -266,6 +271,68 @@ model Notification {
   @@map("notifications")
 }
 
+model Service {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  category    String?
+  price       Float?
+  unit        String?   // hora, m², unidade, etc
+  active      Boolean  @default(true)
+  
+  condominiumId String
+  condominium   Condominium @relation(fields: [condominiumId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("services")
+}
+
+model NotificationSend {
+  id          String   @id @default(cuid())
+  title       String
+  message     String
+  type        NotificationChannel @default(EMAIL)
+  recipients  String[] // Array de IDs de usuários ou telefones/emails
+  status      NotificationStatus @default(PENDING)
+  sentAt      DateTime?
+  errorMessage String?
+  
+  userId      String   // Quem enviou
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  condominiumId String
+  condominium   Condominium @relation(fields: [condominiumId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("notification_sends")
+}
+
+model ImportLog {
+  id          String   @id @default(cuid())
+  fileName    String
+  fileType    String   // excel, csv
+  totalRows   Int
+  successRows Int
+  errorRows   Int
+  errors      String[] // Array de erros encontrados
+  status      ImportStatus @default(PROCESSING)
+  
+  userId      String
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  condominiumId String?
+  condominium   Condominium? @relation(fields: [condominiumId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("import_logs")
+}
+
 // Enums
 enum UserRole {
   ADMIN
@@ -312,4 +379,26 @@ enum NotificationType {
   WARNING
   SUCCESS
   ERROR
+}
+
+enum NotificationChannel {
+  EMAIL
+  SMS
+  WHATSAPP
+  TELEGRAM
+  PUSH
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  CANCELLED
+}
+
+enum ImportStatus {
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
 }

@@ -348,7 +348,7 @@ Relatório gerado em: ${reportData.generatedAt}
               <span className="font-semibold">{employee.name}</span>?
               <br />
               <br />
-              O funcionário será marcado como "Inativo" mas seus dados serão preservados.
+              O funcionário será marcado como &quot;Inativo&quot; mas seus dados serão preservados.
               Você pode reativá-lo a qualquer momento.
             </DialogDescription>
           </DialogHeader>

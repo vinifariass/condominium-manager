@@ -20,7 +20,7 @@ interface EditCondominiumModalProps {
 export function EditCondominiumModal({ isOpen, onClose, onSuccess, condominium }: EditCondominiumModalProps) {
   const { handleUpdateCondominium, loading } = useCondominiumActions()
   const [formData, setFormData] = useState<UpdateCondominiumInput>({
-    id: 0,
+    id: "",
     name: "",
     address: "",
     city: "",
@@ -32,8 +32,7 @@ export function EditCondominiumModal({ isOpen, onClose, onSuccess, condominium }
     totalUnits: 0,
     totalBlocks: 0,
     manager: "",
-    status: "active",
-    description: ""
+    status: "active"
   })
 
   useEffect(() => {
@@ -51,8 +50,7 @@ export function EditCondominiumModal({ isOpen, onClose, onSuccess, condominium }
         totalUnits: condominium.totalUnits,
         totalBlocks: condominium.totalBlocks,
         manager: condominium.manager || "",
-        status: condominium.status,
-        description: condominium.description || ""
+        status: condominium.status
       })
     }
   }, [condominium])
@@ -235,22 +233,19 @@ export function EditCondominiumModal({ isOpen, onClose, onSuccess, condominium }
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Descrição</Label>
-            <Textarea
-              id="description"
-              value={formData.description || ""}
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange("description", e.target.value)}
-              placeholder="Descrição adicional do condomínio"
-              rows={3}
-            />
-          </div>
-
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleClose} disabled={loading}>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={handleClose} 
+              disabled={loading}
+            >
               Cancelar
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button 
+              type="submit" 
+              disabled={loading}
+            >
               {loading ? "Salvando..." : "Salvar Alterações"}
             </Button>
           </DialogFooter>

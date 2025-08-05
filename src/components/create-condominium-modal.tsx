@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -18,6 +18,17 @@ interface CreateCondominiumModalProps {
 
 export function CreateCondominiumModal({ isOpen, onClose, onSuccess }: CreateCondominiumModalProps) {
   const { handleCreateCondominium, loading } = useCondominiumActions()
+  
+  // Fix para garantir que o body sempre tenha pointer-events: auto
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.pointerEvents = "auto"
+    }
+    return () => {
+      document.body.style.pointerEvents = "auto"
+    }
+  }, [isOpen])
+  
   const [formData, setFormData] = useState<CreateCondominiumInput>({
     name: "",
     address: "",
@@ -30,8 +41,7 @@ export function CreateCondominiumModal({ isOpen, onClose, onSuccess }: CreateCon
     totalUnits: 0,
     totalBlocks: 0,
     manager: "",
-    status: "active",
-    description: ""
+    status: "active"
   })
 
   const resetForm = () => {
@@ -47,8 +57,7 @@ export function CreateCondominiumModal({ isOpen, onClose, onSuccess }: CreateCon
       totalUnits: 0,
       totalBlocks: 0,
       manager: "",
-      status: "active",
-      description: ""
+      status: "active"
     })
   }
 
@@ -75,7 +84,9 @@ export function CreateCondominiumModal({ isOpen, onClose, onSuccess }: CreateCon
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent 
+        className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto"
+      >
         <DialogHeader>
           <DialogTitle>Criar Novo Condomínio</DialogTitle>
           <DialogDescription>
@@ -232,22 +243,19 @@ export function CreateCondominiumModal({ isOpen, onClose, onSuccess }: CreateCon
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Descrição</Label>
-            <Textarea
-              id="description"
-              value={formData.description || ""}
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange("description", e.target.value)}
-              placeholder="Descrição adicional do condomínio"
-              rows={3}
-            />
-          </div>
-
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleClose} disabled={loading}>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={handleClose} 
+              disabled={loading}
+            >
               Cancelar
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button 
+              type="submit" 
+              disabled={loading}
+            >
               {loading ? "Criando..." : "Criar Condomínio"}
             </Button>
           </DialogFooter>

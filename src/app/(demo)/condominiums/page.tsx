@@ -10,6 +10,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { CreateCondominiumModal } from "@/components/create-condominium-modal"
 import { EditCondominiumModal } from "@/components/edit-condominium-modal"
 import { ViewCondominiumModal } from "@/components/view-condominium-modal"
+import { TestModal } from "@/components/test-modal"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 import { PermissionGuard } from "@/components/permission-guard"
@@ -25,6 +26,7 @@ function CondominiumsPageContent() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isViewModalOpen, setIsViewModalOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [isTestModalOpen, setIsTestModalOpen] = useState(false)
   const [selectedCondominium, setSelectedCondominium] = useState<Condominium | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -150,6 +152,9 @@ function CondominiumsPageContent() {
             <Plus className="mr-2 h-4 w-4" />
             Novo Condomínio
           </Button>
+          <Button onClick={() => setIsTestModalOpen(true)} variant="secondary">
+            Testar Modal
+          </Button>
         </div>
 
         {/* Search */}
@@ -225,7 +230,7 @@ function CondominiumsPageContent() {
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
+                      <DropdownMenuContent align="end" className="z-50">
                         <DropdownMenuItem onClick={() => handleViewCondominium(condominium)}>
                           <Eye className="mr-2 h-4 w-4" />
                           Visualizar
@@ -304,13 +309,18 @@ function CondominiumsPageContent() {
         condominium={selectedCondominium}
       />
 
+      <TestModal
+        isOpen={isTestModalOpen}
+        onClose={() => setIsTestModalOpen(false)}
+      />
+
       {/* Delete Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir o condomínio "{selectedCondominium?.name}"?
+              Tem certeza que deseja excluir o condomínio &quot;{selectedCondominium?.name}&quot;?
               Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>

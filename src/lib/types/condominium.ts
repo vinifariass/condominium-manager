@@ -5,7 +5,6 @@ export interface Condominium {
   city?: string
   state?: string
   zipCode?: string
-  description?: string
   totalUnits?: number
   totalBlocks?: number
   manager?: string
@@ -23,7 +22,6 @@ export interface CreateCondominiumInput {
   city?: string
   state?: string
   zipCode?: string
-  description?: string
   totalUnits?: number
   totalBlocks?: number
   manager?: string

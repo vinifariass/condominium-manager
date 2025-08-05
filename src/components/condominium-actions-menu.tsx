@@ -94,7 +94,7 @@ export function CondominiumActionsMenu({
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir o condomínio "{condominium.name}"? 
+              Tem certeza que deseja excluir o condomínio &quot;{condominium.name}&quot;? 
               Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
