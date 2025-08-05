@@ -33,28 +33,28 @@ interface LoginFormData {
 // Usuários de demonstração
 const demoUsers = [
   {
-    email: "admin@admin.com",
+    email: "admin@condely.com",
     password: "123456",
     role: "ADMIN",
-    name: "Administrador",
+    name: "Admin Sistema",
     description: "Acesso total ao sistema"
   },
   {
-    email: "sindico@sindico.com", 
+    email: "manager@condely.com", 
     password: "123456",
     role: "MANAGER",
     name: "João Silva",
     description: "Síndico do condomínio"
   },
   {
-    email: "funcionario@funcionario.com",
+    email: "employee@condely.com",
     password: "123456", 
     role: "EMPLOYEE",
     name: "Maria Santos",
     description: "Funcionária do condomínio"
   },
   {
-    email: "morador@morador.com",
+    email: "resident1@condely.com",
     password: "123456",
     role: "RESIDENT", 
     name: "Carlos Oliveira",

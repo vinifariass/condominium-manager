@@ -3,7 +3,7 @@ import { MenuIcon, PanelsTopLeft } from "lucide-react";
 import CondominiumIcon from "@/components/ui/condominium-icon";
 
 import { Button } from "@/components/ui/button";
-import { Menu } from "@/components/admin-panel/menu";
+import { MenuNextAuth } from "@/components/admin-panel/menu-nextauth";
 import {
   Sheet,
   SheetHeader,
@@ -36,7 +36,7 @@ export function SheetMenu() {
             </Link>
           </Button>
         </SheetHeader>
-        <Menu isOpen />
+        <MenuNextAuth isOpen />
       </SheetContent>
     </Sheet>
   );

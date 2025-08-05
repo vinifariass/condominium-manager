@@ -1,5 +1,5 @@
 "use client";
-import { Menu } from "@/components/admin-panel/menu";
+import { MenuNextAuth } from "@/components/admin-panel/menu-nextauth";
 import { SidebarToggle } from "@/components/admin-panel/sidebar-toggle";
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/hooks/use-sidebar";
@@ -52,7 +52,7 @@ export function Sidebar() {
             </h1>
           </Link>
         </Button>
-        <Menu isOpen={getOpenState()} />
+        <MenuNextAuth isOpen={getOpenState()} />
       </div>
     </aside>
   );

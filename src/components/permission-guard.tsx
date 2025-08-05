@@ -1,7 +1,7 @@
 "use client"
 
 import { ReactNode } from "react"
-import { useCurrentUser } from "@/hooks/use-current-user"
+import { useCurrentUserNextAuth } from "@/hooks/use-current-user-nextauth"
 import { UserRole } from "@/lib/types/user"
 
 interface PermissionGuardProps {
@@ -17,7 +17,7 @@ export function PermissionGuard({
   permissions, 
   fallback = null 
 }: PermissionGuardProps) {
-  const { user, permissions: userPermissions, loading } = useCurrentUser()
+  const { user, permissions: userPermissions, loading } = useCurrentUserNextAuth()
 
   if (loading) {
     return <div className="animate-pulse">Carregando...</div>

@@ -9,13 +9,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ContentLayout } from "@/components/admin-panel/content-layout"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
-import { useCurrentUser } from "@/hooks/use-current-user"
+import { useCurrentUserNextAuth } from "@/hooks/use-current-user-nextauth"
 import { User, UserRole, getRoleLabel } from "@/lib/types/user"
 import { Loader2, User as UserIcon, Mail, Phone, Shield, Camera, Upload } from "lucide-react"
 import { toast } from "sonner"
 
 export default function AccountPage() {
-  const { user, loading, updating, updateProfile } = useCurrentUser()
+  const { user, loading, updating, updateProfile } = useCurrentUserNextAuth()
   const [formData, setFormData] = useState({
     name: "",
     email: "",

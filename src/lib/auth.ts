@@ -19,45 +19,71 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          return null
-        }
-
-        const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email
-          }
-        })
-
-        if (!user) {
-          return null
-        }
-
-        // Para desenvolvimento, vamos aceitar qualquer senha por enquanto
-        // Em produção, você deve comparar com hash bcrypt
+        console.log("🔐 Auth.ts - Tentativa de login:", credentials?.email)
         
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          image: user.image,
-          role: user.role,
+        if (!credentials?.email || !credentials?.password) {
+          console.log("❌ Auth.ts - Credenciais incompletas")
+          return null
+        }
+
+        try {
+          const user = await prisma.user.findUnique({
+            where: {
+              email: credentials.email
+            }
+          })
+
+          console.log("👤 Auth.ts - Usuário encontrado no banco:", user ? `${user.name} (${user.email}) - Role: ${user.role}` : "Nenhum")
+
+          if (!user) {
+            console.log("❌ Auth.ts - Usuário não encontrado no banco")
+            return null
+          }
+
+          // Para desenvolvimento, vamos aceitar qualquer senha por enquanto
+          // Em produção, você deve comparar com hash bcrypt
+          console.log("✅ Auth.ts - Login autorizado para:", user.name)
+          
+          const authUser = {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            image: user.image,
+            role: user.role.toLowerCase(),
+            phone: user.phone,
+            condominiumId: user.condominiumId,
+          }
+          
+          console.log("📤 Auth.ts - Retornando user:", authUser)
+          return authUser
+          
+        } catch (error) {
+          console.error("❌ Auth.ts - Erro no banco:", error)
+          return null
         }
       }
     })
   ],
   callbacks: {
     async jwt({ token, user }) {
+      console.log("🔄 Auth.ts - JWT Callback - User:", user, "Token antes:", token)
       if (user) {
         token.role = user.role
+        token.phone = user.phone || undefined
+        token.condominiumId = user.condominiumId || undefined
       }
+      console.log("🔄 Auth.ts - JWT Callback - Token depois:", token)
       return token
     },
     async session({ session, token }) {
+      console.log("📋 Auth.ts - Session Callback - Token:", token, "Session antes:", session)
       if (token) {
         session.user.id = token.sub!
         session.user.role = token.role as string
+        session.user.phone = token.phone || null
+        session.user.condominiumId = token.condominiumId || null
       }
+      console.log("📋 Auth.ts - Session Callback - Session depois:", session)
       return session
     },
   },

@@ -1,6 +1,6 @@
 "use client"
 
-import { useCurrentUser } from "@/hooks/use-current-user"
+import { useCurrentUserNextAuth } from "@/hooks/use-current-user-nextauth"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -9,7 +9,7 @@ import { User, Shield, X, Eye, EyeOff } from "lucide-react"
 import { useState, useEffect } from "react"
 
 export function DebugUser() {
-  const { user, permissions, loading } = useCurrentUser()
+  const { user, permissions, loading } = useCurrentUserNextAuth()
   const [isVisible, setIsVisible] = useState(false)
   const [isMinimized, setIsMinimized] = useState(false)
 
