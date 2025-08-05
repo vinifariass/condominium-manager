@@ -17,7 +17,8 @@ import {
   LucideIcon,
   HelpCircle,
   Calculator,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Banknote
 } from "lucide-react";
 import { UserPermissions } from "./types/user";
 
@@ -90,6 +91,34 @@ export function getMenuList(pathname: string, permissions?: UserPermissions): Gr
           permission: "canManageEmployees"
         },
         {
+          href: "/hr-management",
+          label: "Recursos Humanos",
+          icon: FileText,
+          permission: "canManageEmployees",
+          submenus: [
+            {
+              href: "/hr-management",
+              label: "Dashboard RH",
+              permission: "canManageEmployees"
+            },
+            {
+              href: "/hr-management/medical-certificates",
+              label: "Atestados Médicos",
+              permission: "canManageEmployees"
+            },
+            {
+              href: "/hr-management/substitutions",
+              label: "Substituições",
+              permission: "canManageEmployees"
+            },
+            {
+              href: "/hr-management/timesheet",
+              label: "Controle de Ponto",
+              permission: "canManageEmployees"
+            }
+          ]
+        },
+        {
           href: "/users",
           label: "Usuários do Sistema",
           icon: Users,
@@ -135,6 +164,12 @@ export function getMenuList(pathname: string, permissions?: UserPermissions): Gr
     {
       groupLabel: "Financeiro",
       menus: [
+        {
+          href: "/banking",
+          label: "Integração Bancária",
+          icon: Banknote,
+          permission: "canManageFinancials"
+        },
         {
           href: "/financials",
           label: "Financeiro",

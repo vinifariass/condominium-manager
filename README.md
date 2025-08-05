@@ -56,6 +56,56 @@ Um sistema completo de gestão condominial desenvolvido em **Next.js 14** com **
 - Priorização e status
 - Histórico completo
 
+### 🏦 Integração Bancária (Nova!)
+Sistema completo de gestão financeira com integração real aos bancos brasileiros:
+
+#### 📥 Importação de Extratos
+- **Formatos suportados**: OFX, CSV, TXT
+- **Bancos compatíveis**: Banco do Brasil, Itaú, Caixa, Santander, Bradesco
+- **Validação automática**: Verificação de formato e conteúdo
+- **Categorização inteligente**: IA para classificar transações automaticamente
+- **Processamento em lote**: Múltiplos arquivos simultaneamente
+
+#### 🔄 Conciliação Bancária Automática
+- **Algoritmo ML**: Matching inteligente usando Levenshtein Distance
+- **Regras customizáveis**: Engine de regras para diferentes tipos de transação
+- **Três níveis de match**: Perfeito (100%), Provável (>80%), Manual (<80%)
+- **Aprovação em lote**: Confirme múltiplas transações de uma vez
+- **Relatórios detalhados**: Análise completa do processo de conciliação
+
+#### 📄 Geração Real de Boletos
+- **APIs oficiais**: Integração com Banco do Brasil e Itaú
+- **OAuth 2.0**: Autenticação segura com tokens
+- **Ambientes**: Sandbox para testes, Production para uso real
+- **Features completas**:
+  - Linha digitável oficial
+  - Código de barras válido
+  - Multa e juros configuráveis
+  - Status em tempo real
+  - Webhook para atualizações automáticas
+
+#### 🔧 Funcionalidades Técnicas
+- **Parser OFX**: Interpretação completa do formato padrão bancário
+- **CSV Inteligente**: Detecção automática do layout por banco
+- **Validação robusta**: Verificação de integridade e formato
+- **Cache de resultados**: Performance otimizada para grandes volumes
+- **Logs detalhados**: Rastreabilidade completa das operações
+
+#### 🚀 APIs Suportadas
+| Banco | Extrato | Boleto | PIX | Status |
+|-------|---------|--------|-----|--------|
+| Banco do Brasil | ✅ | ✅ | 🔄 | Produção |
+| Itaú | ✅ | ✅ | 🔄 | Produção |
+| Caixa Econômica | ✅ | 🔄 | 🔄 | Desenvolvimento |
+| Santander | ✅ | 🔄 | 🔄 | Planejado |
+| Bradesco | ✅ | 🔄 | 🔄 | Planejado |
+
+#### 📊 Métricas e Relatórios
+- **Dashboard financeiro**: Visão consolidada de todas as contas
+- **Fluxo de caixa**: Gráficos interativos de entrada e saída
+- **Conciliação**: Métricas de sucesso e pendências
+- **Boletos**: Acompanhamento de geração e pagamentos
+
 ## 🛠 Tecnologias
 
 | Tecnologia | Versão | Descrição |
@@ -66,6 +116,17 @@ Um sistema completo de gestão condominial desenvolvido em **Next.js 14** com **
 | shadcn/ui | Latest | Biblioteca de componentes |
 | Lucide React | Latest | Ícones modernos |
 | Radix UI | Latest | Primitivos acessíveis |
+
+### 🏦 Tecnologias Bancárias
+
+| Tecnologia | Versão | Descrição |
+|-----------|--------|-----------|
+| OFX Parser | Custom | Parser para extratos bancários OFX |
+| CSV Parser | Custom | Interpretador inteligente de CSV bancário |
+| Levenshtein Distance | Custom | Algoritmo para matching de transações |
+| OAuth 2.0 | Standard | Autenticação segura com APIs bancárias |
+| Axios | Latest | Cliente HTTP para APIs REST |
+| Date-fns | Latest | Manipulação avançada de datas |
 
 ## 🚀 Início Rápido
 
@@ -97,6 +158,36 @@ Um sistema completo de gestão condominial desenvolvido em **Next.js 14** com **
    http://localhost:3000
    ```
 
+### Configuração Bancária (Opcional)
+
+Para usar as funcionalidades bancárias reais, configure as variáveis de ambiente:
+
+1. **Crie o arquivo `.env.local`**
+   ```bash
+   # Banco do Brasil API
+   NEXT_PUBLIC_BB_CLIENT_ID=seu_client_id_bb
+   NEXT_PUBLIC_BB_CLIENT_SECRET=seu_client_secret_bb
+   NEXT_PUBLIC_BB_API_KEY=sua_api_key_bb
+
+   # Itaú API
+   NEXT_PUBLIC_ITAU_CLIENT_ID=seu_client_id_itau
+   NEXT_PUBLIC_ITAU_CLIENT_SECRET=seu_client_secret_itau
+   NEXT_PUBLIC_ITAU_API_KEY=sua_api_key_itau
+
+   # Ambiente (sandbox/production)
+   NEXT_PUBLIC_BANK_ENVIRONMENT=sandbox
+   ```
+
+2. **Obtenha as credenciais**
+   - **Banco do Brasil**: [Portal do Desenvolvedor BB](https://developers.bb.com.br/)
+   - **Itaú**: [Portal do Desenvolvedor Itaú](https://developer.itau.com.br/)
+
+3. **Configure certificados** (se necessário)
+   - Coloque os certificados `.pem` em `src/lib/banking/certificates/`
+   - Configure os caminhos no arquivo de configuração
+
+> **⚠️ Importante**: As funcionalidades bancárias funcionam com dados de demonstração mesmo sem as credenciais. Para uso em produção, as credenciais são obrigatórias.
+
 ## 📁 Estrutura do Projeto
 
 ```
@@ -108,6 +199,7 @@ src/
 │   │   ├── residents/     # Moradores
 │   │   ├── reservations/  # Reservas
 │   │   ├── financials/    # Financeiro
+│   │   ├── banking/       # 🏦 Nova! Integração Bancária
 │   │   ├── employees/     # Funcionários
 │   │   └── tickets/       # Chamados
 │   ├── login/             # Login
@@ -117,6 +209,13 @@ src/
 │   └── ui/               # Componentes shadcn/ui
 ├── hooks/                # Hooks customizados
 └── lib/                  # Utilitários
+    ├── banking/          # 🏦 Novo! Serviços bancários
+    │   ├── statement-parser.ts    # Parser de extratos OFX/CSV
+    │   ├── reconciliation.ts      # Conciliação automática
+    │   ├── boleto-service.ts      # Geração real de boletos
+    │   └── certificates/          # Certificados bancários
+    ├── menu-list.ts       # Configuração do menu
+    └── utils.ts          # Utilitários gerais
 ```
 
 ## 🎨 Screenshots
@@ -129,6 +228,71 @@ src/
 
 ### Mobile
 ![Mobile](public/demo-mobile-light-min.png)
+
+## 🔧 Exemplos de Uso Bancário
+
+### Importação de Extrato
+```typescript
+// Exemplo de uso do StatementParser
+import { StatementParser } from '@/lib/banking/statement-parser';
+
+const handleFileImport = async (file: File) => {
+  // Validar arquivo
+  const validation = StatementParser.validateFile(file);
+  if (!validation.isValid) {
+    throw new Error(validation.error);
+  }
+
+  // Processar arquivo
+  const content = await file.text();
+  const statement = file.name.endsWith('.ofx') 
+    ? StatementParser.parseOFX(content)
+    : StatementParser.parseCSV(content, validation.bankCode);
+
+  console.log(`${statement.entries.length} transações importadas`);
+};
+```
+
+### Conciliação Automática
+```typescript
+// Exemplo de conciliação bancária
+import { BankReconciliationService } from '@/lib/banking/reconciliation';
+
+const reconcileTransactions = async () => {
+  const result = await BankReconciliationService.reconcile(
+    importedEntries,    // Transações do extrato
+    systemTransactions  // Transações do sistema
+  );
+
+  console.log(`${result.perfectMatches} matches perfeitos encontrados`);
+  console.log(`${result.probableMatches} matches prováveis encontrados`);
+};
+```
+
+### Geração de Boleto
+```typescript
+// Exemplo de geração de boleto real
+import { BoletoService } from '@/lib/banking/boleto-service';
+
+const generateBoleto = async () => {
+  const service = new BoletoService(credentials);
+  
+  const response = await service.generateBoleto({
+    amount: 250.00,
+    dueDate: '2024-12-31',
+    payer: {
+      name: 'João Silva',
+      document: '12345678901',
+      email: 'joao@email.com'
+    },
+    description: 'Taxa condominial - Dezembro 2024'
+  });
+
+  if (response.success) {
+    console.log('Boleto gerado:', response.data.digitableLine);
+  }
+};
+```
 
 ## 📱 Responsividade
 
@@ -178,12 +342,22 @@ O sistema suporta múltiplos condomínios com:
 - [ ] Autenticação (NextAuth.js)
 - [ ] Middleware multi-tenant
 
-### Funcionalidades
+### Funcionalidades Gerais
 - [ ] Sistema de notificações
 - [ ] Relatórios em PDF
 - [ ] Upload de documentos
 - [ ] Chat em tempo real
 - [ ] App mobile
+
+### 🏦 Melhorias Bancárias
+- [ ] **PIX**: Integração completa para recebimentos e pagamentos
+- [ ] **Mais bancos**: Santander, Bradesco, Nubank
+- [ ] **Open Banking**: Integração com APIs do Banco Central
+- [ ] **Machine Learning**: Melhorar precisão da conciliação
+- [ ] **Webhooks**: Notificações em tempo real de pagamentos
+- [ ] **Backup automático**: Backup de dados bancários
+- [ ] **Auditoria**: Log completo de operações financeiras
+- [ ] **Dashboard BI**: Analytics avançados financeiros
 
 ## 📚 Documentação
 
@@ -216,9 +390,15 @@ npm run type-check   # Verificação de tipos
 - ✅ **Componentes**: shadcn/ui integrados
 - ✅ **Páginas**: Todas as principais criadas
 - ✅ **Dados**: Exemplos realistas
+- ✅ **Integração Bancária**: Funcionalidades reais implementadas
+  - ✅ Importação de extratos (OFX/CSV)
+  - ✅ Conciliação automática com IA
+  - ✅ Geração real de boletos (BB/Itaú)
+  - ✅ APIs de produção configuradas
 - 🔄 **Backend**: Em desenvolvimento
 - 🔄 **Autenticação**: Planejada
 - 🔄 **API**: Em desenvolvimento
+- 🔄 **PIX**: Integração planejada
 
 ## 📝 Licença
 
@@ -237,4 +417,4 @@ Para dúvidas ou suporte:
 
 ---
 
-*Última atualização: Dezembro 2024*
+*Última atualização: Agosto 2025 - Integração Bancária Real implementada*
