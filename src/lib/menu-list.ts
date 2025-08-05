@@ -222,12 +222,6 @@ export function getMenuList(pathname: string, permissions?: UserPermissions): Gr
       groupLabel: "Sistema",
       menus: [
         {
-          href: "/switch-user",
-          label: "Trocar Usuário",
-          icon: Users,
-          permission: "canManageUsers"
-        },
-        {
           href: "/settings",
           label: "Configurações",
           icon: Settings,

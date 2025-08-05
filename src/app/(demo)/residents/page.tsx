@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PermissionGuard } from "@/components/permission-guard";
 import { 
   Select,
   SelectContent,
@@ -50,6 +51,30 @@ import {
 } from "lucide-react";
 
 export default function ResidentsPage() {
+  return (
+    <PermissionGuard 
+      permissions={["canManageResidents"]}
+      fallback={
+        <ContentLayout title="Acesso Negado">
+          <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
+            <Users className="h-16 w-16 text-muted-foreground mb-4" />
+            <h2 className="text-2xl font-semibold mb-2">Acesso Restrito</h2>
+            <p className="text-muted-foreground mb-4">
+              Você não tem permissão para gerenciar moradores.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Esta área é restrita para administradores e síndicos.
+            </p>
+          </div>
+        </ContentLayout>
+      }
+    >
+      <ResidentsPageContent />
+    </PermissionGuard>
+  );
+}
+
+function ResidentsPageContent() {
   // Estados para controle do formulário e filtros
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");

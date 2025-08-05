@@ -34,10 +34,21 @@ let users: User[] = [
     createdAt: new Date("2024-03-01"),
     updatedAt: new Date("2024-03-01"),
   },
+  {
+    id: "4",
+    name: "Carlos Morador",
+    email: "carlos.morador@email.com",
+    phone: "(11) 96666-6666",
+    role: "resident",
+    status: "active",
+    condominiumId: "1",
+    createdAt: new Date("2024-04-01"),
+    updatedAt: new Date("2024-04-01"),
+  },
 ]
 
-// Simular usuário logado (por padrão será admin)
-let currentUser: User = users[0]
+// Simular usuário logado (inicialmente null - ninguém logado)
+let currentUser: User | null = null
 
 export const userDb = {
   // Buscar todos os usuários
@@ -107,20 +118,26 @@ export const userDb = {
   },
 
   // Obter usuário atual
-  getCurrentUser: async (): Promise<User> => {
+  getCurrentUser: async (): Promise<User | null> => {
     await new Promise(resolve => setTimeout(resolve, 50))
-    return { ...currentUser }
+    console.log("MockDB: getCurrentUser called, currentUser:", currentUser)
+    return currentUser ? { ...currentUser } : null
   },
 
   // Definir usuário atual (para simulação de login)
   setCurrentUser: async (userId: string): Promise<User | null> => {
     await new Promise(resolve => setTimeout(resolve, 100))
     
+    console.log("MockDB: setCurrentUser called with userId:", userId)
+    console.log("MockDB: Available users:", users.map(u => ({id: u.id, name: u.name, role: u.role})))
+    
     const user = users.find(u => u.id === userId)
     if (user) {
       currentUser = user
+      console.log("MockDB: setCurrentUser success, new currentUser:", currentUser)
       return { ...user }
     }
+    console.log("MockDB: setCurrentUser failed, user not found for id:", userId)
     return null
   },
 }

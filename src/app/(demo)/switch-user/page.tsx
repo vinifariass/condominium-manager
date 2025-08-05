@@ -41,16 +41,26 @@ export default function UserSwitchPage() {
   const [switching, setSwitching] = useState<string | null>(null)
 
   const handleSwitchUser = async (userId: string) => {
+    console.log("Switch-user: Starting switch to user:", userId)
     setSwitching(userId)
     try {
       const result = await setCurrentUser(userId)
+      console.log("Switch-user: Server response:", result)
       if (result.success) {
-        await refreshUser()
         toast.success(`Logado como ${result.data?.name}`)
+        console.log("Switch-user: Dispatching user-changed event")
+        // Disparar evento customizado para atualizar o contexto
+        window.dispatchEvent(new CustomEvent('user-changed'))
+        // Aguardar um pouco para permitir que o contexto seja atualizado
+        setTimeout(() => {
+          console.log("Switch-user: Calling refreshUser")
+          refreshUser()
+        }, 200)
       } else {
         toast.error("Erro ao trocar usuário")
       }
     } catch (error) {
+      console.error("Switch-user: Error switching user:", error)
       toast.error("Erro ao trocar usuário")
     } finally {
       setSwitching(null)

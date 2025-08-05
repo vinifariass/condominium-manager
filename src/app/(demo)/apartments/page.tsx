@@ -5,6 +5,7 @@ import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { PermissionGuard } from "@/components/permission-guard";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -85,6 +86,30 @@ const FILTER_OPTIONS = {
 };
 
 export default function ApartmentsPage() {
+  return (
+    <PermissionGuard 
+      permissions={["canManageApartments"]}
+      fallback={
+        <ContentLayout title="Acesso Negado">
+          <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
+            <Building2 className="h-16 w-16 text-muted-foreground mb-4" />
+            <h2 className="text-2xl font-semibold mb-2">Acesso Restrito</h2>
+            <p className="text-muted-foreground mb-4">
+              Você não tem permissão para gerenciar apartamentos.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Esta área é restrita para administradores e síndicos.
+            </p>
+          </div>
+        </ContentLayout>
+      }
+    >
+      <ApartmentsPageContent />
+    </PermissionGuard>
+  );
+}
+
+function ApartmentsPageContent() {
   // Estados para filtros
   const [filters, setFilters] = useState<ApartmentFilters>({
     search: "",

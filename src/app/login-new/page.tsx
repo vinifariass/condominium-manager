@@ -1,14 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
+import { signIn, getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { setCurrentUser } from "@/lib/actions/user-actions";
-import { getRoleLabel } from "@/lib/types/user";
 import { toast } from "sonner";
 import { 
   Building2, 
@@ -26,54 +24,43 @@ import {
   Check
 } from "lucide-react";
 
-// Interface para dados do usuário
-interface UserCredentials {
+interface LoginFormData {
   email: string;
   password: string;
-}
-
-interface LoginFormData extends UserCredentials {
   rememberMe: boolean;
 }
 
-// Usuários disponíveis para login
-const availableUsers = [
+// Usuários de demonstração
+const demoUsers = [
   {
-    id: "1",
-    name: "Administrador Sistema",
-    email: "admin@sistema.com",
-    password: "admin123",
-    role: "admin" as const,
+    email: "admin@admin.com",
+    password: "123456",
+    role: "ADMIN",
+    name: "Administrador",
     description: "Acesso total ao sistema"
   },
   {
-    id: "2", 
+    email: "sindico@sindico.com", 
+    password: "123456",
+    role: "MANAGER",
     name: "João Silva",
-    email: "joao.silva@email.com", 
-    password: "sindico123",
-    role: "manager" as const,
     description: "Síndico do condomínio"
   },
   {
-    id: "3",
-    name: "Maria Santos", 
-    email: "maria.santos@email.com",
-    password: "funcionario123",
-    role: "employee" as const, 
+    email: "funcionario@funcionario.com",
+    password: "123456", 
+    role: "EMPLOYEE",
+    name: "Maria Santos",
     description: "Funcionária do condomínio"
   },
   {
-    id: "4",
-    name: "Carlos Morador", 
-    email: "carlos.morador@email.com",
-    password: "morador123",
-    role: "resident" as const, 
+    email: "morador@morador.com",
+    password: "123456",
+    role: "RESIDENT", 
+    name: "Carlos Oliveira",
     description: "Morador do condomínio"
   }
 ];
-
-// Compatibilidade com o código antigo
-const ADMIN_USER = availableUsers[0];
 
 export default function LoginPage() {
   const router = useRouter();
@@ -89,11 +76,12 @@ export default function LoginPage() {
   const [copiedField, setCopiedField] = useState<"email" | "password" | null>(null);
 
   // Função para preencher automaticamente com dados do admin
-  const fillAdminCredentials = () => {
+  const fillDemoCredentials = (userType: string = "admin") => {
+    const user = demoUsers.find(u => u.role.toLowerCase() === userType.toLowerCase()) || demoUsers[0];
     setFormData(prev => ({
       ...prev,
-      email: ADMIN_USER.email,
-      password: ADMIN_USER.password
+      email: user.email,
+      password: user.password
     }));
     setError("");
   };
@@ -140,33 +128,23 @@ export default function LoginPage() {
       return;
     }
 
-    // Simular autenticação
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const result = await signIn("credentials", {
+        email: formData.email,
+        password: formData.password,
+        redirect: false,
+      });
 
-      // Verificar credenciais
-      const user = availableUsers.find(u => u.email === formData.email && u.password === formData.password);
-      
-      if (user) {
-        const result = await setCurrentUser(user.id);
-        if (result.success) {
-          setSuccess(`Login realizado como ${user.name}!`);
-          toast.success(`Bem-vindo, ${user.name}!`);
-          
-          // Salvar dados do usuário (simulação)
-          if (formData.rememberMe) {
-            localStorage.setItem('rememberedUser', JSON.stringify(user));
-          }
-          
-          // Redirecionar para dashboard
-          setTimeout(() => {
-            router.push('/dashboard');
-          }, 1000);
-        } else {
-          setError("Erro interno do sistema. Tente novamente.");
-        }
-      } else {
+      if (result?.error) {
         setError("Email ou senha incorretos");
+      } else {
+        setSuccess("Login realizado com sucesso!");
+        toast.success("Bem-vindo ao sistema!");
+        
+        // Aguardar um pouco e redirecionar
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 1000);
       }
     } catch (err) {
       console.error("Error during login:", err);
@@ -177,26 +155,32 @@ export default function LoginPage() {
   };
 
   // Função para login rápido por tipo de usuário
-  const handleQuickLoginByRole = async (role: string) => {
-    const user = availableUsers.find(u => u.role === role);
-    if (user) {
-      setIsLoading(true);
-      try {
-        const result = await setCurrentUser(user.id);
-        if (result.success) {
-          toast.success(`Login realizado como ${user.name}!`);
-          router.push('/dashboard');
-        } else {
-          toast.error("Erro ao fazer login");
-        }
-      } catch (error) {
-        console.error("Error during quick login:", error);
+  const handleQuickLogin = async (userType: string) => {
+    const user = demoUsers.find(u => u.role.toLowerCase() === userType.toLowerCase());
+    if (!user) return;
+
+    setIsLoading(true);
+    try {
+      const result = await signIn("credentials", {
+        email: user.email,
+        password: user.password,
+        redirect: false,
+      });
+
+      if (result?.error) {
         toast.error("Erro ao fazer login");
-      } finally {
-        setIsLoading(false);
+      } else {
+        toast.success(`Login realizado como ${user.name}!`);
+        router.push('/dashboard');
       }
+    } catch (error) {
+      console.error("Error during quick login:", error);
+      toast.error("Erro ao fazer login");
+    } finally {
+      setIsLoading(false);
     }
   };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4">
       <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-center">
@@ -240,31 +224,28 @@ export default function LoginPage() {
               </ul>
             </div>
 
-            {/* Testimonials */}
+            {/* Demo Users Info */}
             <div className="space-y-4">
-              <h3 className="font-semibold">Nossos clientes</h3>
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3 p-4 bg-white dark:bg-slate-800 rounded-lg border">
-                  <Avatar>
-                    <AvatarFallback>CS</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="text-sm font-medium">Carlos Silva</p>
-                    <p className="text-xs text-muted-foreground">Síndico - Residencial Jardim das Flores</p>
-                    <p className="text-sm mt-1">&ldquo;O sistema revolucionou nossa gestão!&rdquo;</p>
+              <h3 className="font-semibold">Usuários Demo Disponíveis</h3>
+              <div className="space-y-3">
+                {demoUsers.map((user, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-lg border">
+                    <div className="flex items-center space-x-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="text-xs">
+                          {user.name.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-medium">{user.name}</p>
+                        <p className="text-xs text-muted-foreground">{user.description}</p>
+                      </div>
+                    </div>
+                    <Badge variant="outline" className="text-xs">
+                      {user.role}
+                    </Badge>
                   </div>
-                </div>
-                
-                <div className="flex items-center space-x-3 p-4 bg-white dark:bg-slate-800 rounded-lg border">
-                  <Avatar>
-                    <AvatarFallback>AS</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="text-sm font-medium">Ana Santos</p>
-                    <p className="text-xs text-muted-foreground">Administradora - Portal do Sol</p>
-                    <p className="text-sm mt-1">&ldquo;Interface intuitiva e muito completa.&rdquo;</p>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
@@ -301,12 +282,12 @@ export default function LoginPage() {
                   <div className="flex items-center justify-between bg-white dark:bg-gray-800 rounded px-3 py-2">
                     <div>
                       <span className="text-gray-600 dark:text-gray-400">Email:</span>
-                      <span className="ml-2 font-mono text-blue-600 dark:text-blue-400">{ADMIN_USER.email}</span>
+                      <span className="ml-2 font-mono text-blue-600 dark:text-blue-400">{demoUsers[0].email}</span>
                     </div>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => copyToClipboard(ADMIN_USER.email, "email")}
+                      onClick={() => copyToClipboard(demoUsers[0].email, "email")}
                       className="h-6 w-6 p-0"
                     >
                       {copiedField === "email" ? 
@@ -318,12 +299,12 @@ export default function LoginPage() {
                   <div className="flex items-center justify-between bg-white dark:bg-gray-800 rounded px-3 py-2">
                     <div>
                       <span className="text-gray-600 dark:text-gray-400">Senha:</span>
-                      <span className="ml-2 font-mono text-blue-600 dark:text-blue-400">{ADMIN_USER.password}</span>
+                      <span className="ml-2 font-mono text-blue-600 dark:text-blue-400">{demoUsers[0].password}</span>
                     </div>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => copyToClipboard(ADMIN_USER.password, "password")}
+                      onClick={() => copyToClipboard(demoUsers[0].password, "password")}
                       className="h-6 w-6 p-0"
                     >
                       {copiedField === "password" ? 
@@ -336,7 +317,7 @@ export default function LoginPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={fillAdminCredentials}
+                  onClick={() => fillDemoCredentials("admin")}
                   className="w-full mt-3 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800"
                 >
                   Preencher automaticamente
@@ -413,9 +394,6 @@ export default function LoginPage() {
                     />
                     <span className="text-sm">Lembrar de mim</span>
                   </label>
-                  <Link href="/forgot-password" className="text-sm text-primary hover:underline">
-                    Esqueceu a senha?
-                  </Link>
                 </div>
 
                 <Button 
@@ -443,40 +421,31 @@ export default function LoginPage() {
                   <span className="w-full border-t border-border" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">Outros tipos de acesso</span>
+                  <span className="bg-background px-2 text-muted-foreground">Login rápido</span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-2">
                 <Button 
                   variant="outline" 
-                  className="flex items-center justify-center py-3"
+                  size="sm"
                   disabled={isLoading}
                   type="button"
-                  onClick={() => handleQuickLoginByRole("manager")}
+                  onClick={() => handleQuickLogin("manager")}
                 >
-                  <Building2 className="mr-2 h-4 w-4" />
+                  <Building2 className="mr-2 h-3 w-3" />
                   Síndico
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="flex items-center justify-center py-3"
+                  size="sm"
                   disabled={isLoading}
                   type="button"
-                  onClick={() => handleQuickLoginByRole("resident")}
+                  onClick={() => handleQuickLogin("resident")}
                 >
-                  <User className="mr-2 h-4 w-4" />
+                  <User className="mr-2 h-3 w-3" />
                   Morador
                 </Button>
-              </div>
-
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground">
-                  Não tem uma conta?{" "}
-                  <Link href="/register" className="text-primary hover:underline font-medium">
-                    Cadastre-se aqui
-                  </Link>
-                </p>
               </div>
             </CardContent>
           </Card>
@@ -484,11 +453,6 @@ export default function LoginPage() {
           {/* Footer */}
           <div className="mt-8 text-center text-xs text-muted-foreground">
             <p>© 2024 Sistema de Condomínio. Todos os direitos reservados.</p>
-            <div className="mt-2 space-x-4">
-              <Link href="/privacy" className="hover:underline">Privacidade</Link>
-              <Link href="/terms" className="hover:underline">Termos</Link>
-              <Link href="/support" className="hover:underline">Suporte</Link>
-            </div>
           </div>
         </div>
       </div>

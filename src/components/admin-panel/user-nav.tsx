@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { LayoutGrid, LogOut, User, Settings, Shield } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -23,10 +24,26 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useUserContext } from "@/contexts/user-context";
 import { getRoleLabel } from "@/lib/types/user";
 
 export function UserNav() {
   const { user, loading } = useCurrentUser();
+  const { logout } = useUserContext();
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await logout();
+      router.push("/login");
+    } catch (error) {
+      console.error("Error during logout:", error);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   const getInitials = (name: string) => {
     return name
@@ -111,9 +128,13 @@ export function UserNav() {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="hover:cursor-pointer" onClick={() => {}}>
+        <DropdownMenuItem 
+          className="hover:cursor-pointer" 
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+        >
           <LogOut className="w-4 h-4 mr-3 text-muted-foreground" />
-          Sair
+          {isLoggingOut ? "Saindo..." : "Sair"}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

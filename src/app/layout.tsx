@@ -4,6 +4,7 @@ import { GeistSans } from "geist/font/sans";
 import "./globals.css";
 
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { UserProvider } from "@/contexts/user-context";
 import { Toaster } from 'sonner';
 
 export const metadata: Metadata = {
@@ -44,8 +45,10 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={GeistSans.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {children}
-          <Toaster richColors />
+          <UserProvider>
+            {children}
+            <Toaster richColors />
+          </UserProvider>
         </ThemeProvider>
       </body>
     </html>

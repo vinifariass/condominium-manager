@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { PermissionGuard } from "@/components/permission-guard";
 import {
   Select,
   SelectContent,
@@ -130,6 +131,30 @@ interface LocalBoletoData {
 }
 
 export default function BankingPage() {
+  return (
+    <PermissionGuard 
+      permissions={["canManageFinancials"]}
+      fallback={
+        <ContentLayout title="Acesso Negado">
+          <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
+            <Building2 className="h-16 w-16 text-muted-foreground mb-4" />
+            <h2 className="text-2xl font-semibold mb-2">Acesso Restrito</h2>
+            <p className="text-muted-foreground mb-4">
+              Você não tem permissão para acessar a integração bancária.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Esta área é restrita para administradores e síndicos.
+            </p>
+          </div>
+        </ContentLayout>
+      }
+    >
+      <BankingPageContent />
+    </PermissionGuard>
+  );
+}
+
+function BankingPageContent() {
   // Estados
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedAccount, setSelectedAccount] = useState<string | null>(null);

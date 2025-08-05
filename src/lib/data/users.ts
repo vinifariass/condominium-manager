@@ -19,11 +19,11 @@ export async function getUserById(id: string): Promise<User | null> {
   }
 }
 
-export async function getCurrentUser(): Promise<User> {
+export async function getCurrentUser(): Promise<User | null> {
   try {
     return await userDb.getCurrentUser()
   } catch (error) {
     console.error("Error fetching current user:", error)
-    throw new Error("Failed to fetch current user")
+    return null
   }
 }

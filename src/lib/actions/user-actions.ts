@@ -41,7 +41,9 @@ export async function deleteUser(id: string) {
 
 export async function setCurrentUser(userId: string) {
   try {
+    console.log('Setting current user to:', userId)
     const user = await userDb.setCurrentUser(userId)
+    console.log('User set successfully:', user)
     if (!user) {
       return { success: false, error: "User not found" }
     }
