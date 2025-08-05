@@ -28,8 +28,13 @@ export function useCurrentUserNextAuth() {
     
     try {
       // Aqui você pode implementar a lógica de atualização via API
-      // Por enquanto vamos apenas simular
-      await update(data)
+      // Por enquanto vamos apenas simular uma atualização sem causar loop
+      console.log("Updating profile with:", data)
+      
+      // Note: removed the update() call that was causing the infinite loop
+      // In a real app, you would call your API here and then update the session
+      // await update(data)
+      
       toast.success("Perfil atualizado com sucesso!")
       return { success: true, data }
     } catch (error) {

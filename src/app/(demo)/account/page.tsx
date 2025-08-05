@@ -28,14 +28,23 @@ export default function AccountPage() {
 
   useEffect(() => {
     if (user) {
-      setFormData({
-        name: user.name || "",
-        email: user.email || "",
-        phone: user.phone || "",
-        role: user.role,
-        avatar: user.avatar || "",
+      setFormData(prev => {
+        // Only update if the values are actually different to prevent infinite loops
+        const newData = {
+          name: user.name || "",
+          email: user.email || "",
+          phone: user.phone || "",
+          role: user.role,
+          avatar: user.avatar || "",
+        }
+        
+        // Compare with previous values
+        if (JSON.stringify(prev) !== JSON.stringify(newData)) {
+          setAvatarPreview(user.avatar || "")
+          return newData
+        }
+        return prev
       })
-      setAvatarPreview(user.avatar || "")
     }
   }, [user])
 

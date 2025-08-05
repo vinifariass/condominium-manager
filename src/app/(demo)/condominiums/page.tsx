@@ -14,7 +14,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 import { PermissionGuard } from "@/components/permission-guard"
 import { Condominium } from "@/lib/types/condominium"
-import { getCondominiums } from "@/lib/data/condominiums"
+// import { getCondominiums } from "@/lib/data/condominiums" // Removido - agora usa API
 import { useCondominiumActions } from "@/hooks/use-condominium-actions"
 import { Plus, Search, MoreHorizontal, Eye, Edit, Trash2, Building, MapPin, Users, Phone } from "lucide-react"
 
@@ -32,8 +32,19 @@ function CondominiumsPageContent() {
 
   const loadCondominiums = async () => {
     try {
+      console.log("Debug: Iniciando carregamento de condomínios...")
       setIsLoading(true)
-      const data = await getCondominiums()
+      
+      const response = await fetch('/api/condominiums')
+      if (!response.ok) {
+        throw new Error('Failed to fetch condominiums')
+      }
+      
+      const result = await response.json()
+      const data = result.data || []
+      
+      console.log("Debug: Dados recebidos:", data)
+      console.log("Debug: Quantidade de condomínios:", data?.length)
       setCondominiums(data)
     } catch (error) {
       console.error("Error loading condominiums:", error)
@@ -49,7 +60,7 @@ function CondominiumsPageContent() {
   const filteredCondominiums = condominiums.filter(condominium =>
     condominium.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     condominium.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    condominium.city.toLowerCase().includes(searchTerm.toLowerCase())
+    (condominium.city && condominium.city.toLowerCase().includes(searchTerm.toLowerCase()))
   )
 
   const handleCreateSuccess = () => {

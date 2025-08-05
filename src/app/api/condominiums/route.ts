@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
 
     if (id) {
       // Get single condominium
-      const condominium = await getCondominiumById(parseInt(id))
+      const condominium = await getCondominiumById(id)
       if (!condominium) {
         return NextResponse.json(
           { error: "Condomínio não encontrado" },
@@ -93,7 +93,7 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    const result = await deleteCondominium(parseInt(id))
+    const result = await deleteCondominium(id)
 
     if (!result.success) {
       return NextResponse.json(

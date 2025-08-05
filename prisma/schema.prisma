@@ -88,9 +88,16 @@ model Condominium {
   id          String   @id @default(cuid())
   name        String
   address     String
+  city        String?
+  state       String?
+  zipCode     String?
   phone       String?
   email       String?
-  cnpj        String?
+  cnpj        String?  @unique
+  manager     String?
+  totalUnits  Int?     @default(0)
+  totalBlocks Int?     @default(0)
+  status      CondominiumStatus @default(ACTIVE)
   
   // Relacionamentos
   users       User[]
@@ -271,6 +278,12 @@ enum UserStatus {
   ACTIVE
   INACTIVE
   SUSPENDED
+}
+
+enum CondominiumStatus {
+  ACTIVE
+  INACTIVE
+  MAINTENANCE
 }
 
 enum ReservationStatus {

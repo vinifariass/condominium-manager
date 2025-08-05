@@ -1,15 +1,14 @@
 export interface Condominium {
-  id: number
+  id: string
   name: string
   address: string
-  city: string
-  state: string
-  zipCode: string
+  city?: string
+  state?: string
+  zipCode?: string
   description?: string
-  totalUnits: number
-  totalBlocks: number
+  totalUnits?: number
+  totalBlocks?: number
   manager?: string
-  managerId?: number
   phone?: string
   email?: string
   cnpj?: string
@@ -21,14 +20,13 @@ export interface Condominium {
 export interface CreateCondominiumInput {
   name: string
   address: string
-  city: string
-  state: string
-  zipCode: string
+  city?: string
+  state?: string
+  zipCode?: string
   description?: string
-  totalUnits: number
-  totalBlocks: number
+  totalUnits?: number
+  totalBlocks?: number
   manager?: string
-  managerId?: number
   phone?: string
   email?: string
   cnpj?: string
@@ -36,5 +34,5 @@ export interface CreateCondominiumInput {
 }
 
 export interface UpdateCondominiumInput extends Partial<CreateCondominiumInput> {
-  id: number
+  id: string
 }

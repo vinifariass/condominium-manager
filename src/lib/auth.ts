@@ -86,6 +86,13 @@ export const authOptions: NextAuthOptions = {
       console.log("📋 Auth.ts - Session Callback - Session depois:", session)
       return session
     },
+    async redirect({ url, baseUrl }) {
+      console.log("🔄 Auth.ts - Redirect Callback - URL:", url, "BaseURL:", baseUrl)
+      // Sempre redirecionar para o dashboard após login bem-sucedido
+      if (url.startsWith("/")) return `${baseUrl}${url}`
+      else if (new URL(url).origin === baseUrl) return url
+      return `${baseUrl}/dashboard`
+    },
   },
   pages: {
     signIn: "/login",

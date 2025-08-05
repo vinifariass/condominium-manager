@@ -51,7 +51,7 @@ export function useCondominiumActions() {
     }
   }
 
-  const handleDeleteCondominium = async (id: number) => {
+  const handleDeleteCondominium = async (id: string) => {
     setIsLoading(true)
     
     try {

@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
+import { seedCondominiums } from './seed-condominiums'
 
 const prisma = new PrismaClient()
 
@@ -12,16 +13,16 @@ async function main() {
   await prisma.user.deleteMany()
   await prisma.condominium.deleteMany()
 
-  // Criar condomínio de exemplo
-  console.log('🏢 Criando condomínio...')
-  const condominium = await prisma.condominium.create({
-    data: {
-      name: 'Residencial Vista Alegre',
-      address: 'Rua das Flores, 123 - São Paulo, SP - 01234-567',
-      phone: '(11) 1234-5678',
-      email: 'admin@residencialvista.com.br',
-    },
-  })
+  // Criar condomínios dos recibos
+  console.log('🏢 Criando condomínios dos recibos...')
+  await seedCondominiums()
+
+  // Pegar o primeiro condomínio para os usuários demo
+  const firstCondominium = await prisma.condominium.findFirst()
+  
+  if (!firstCondominium) {
+    throw new Error('Nenhum condomínio criado')
+  }
 
   // Criar apartamentos
   console.log('🏠 Criando bloco e apartamentos...')
@@ -31,7 +32,7 @@ async function main() {
     data: {
       name: 'Bloco A',
       description: 'Bloco principal do condomínio',
-      condominiumId: condominium.id,
+      condominiumId: firstCondominium.id,
     },
   })
 
@@ -42,7 +43,7 @@ async function main() {
         number: `${i}01`,
         floor: i,
         blockId: block.id,
-        condominiumId: condominium.id,
+        condominiumId: firstCondominium.id,
       },
     })
     apartments.push(apartment)
@@ -58,7 +59,7 @@ async function main() {
       email: 'admin@condely.com',
       phone: '(11) 99999-0001',
       role: 'ADMIN',
-      condominiumId: condominium.id,
+      condominiumId: firstCondominium.id,
     },
   })
 
@@ -69,7 +70,7 @@ async function main() {
       email: 'manager@condely.com',
       phone: '(11) 99999-0002',
       role: 'MANAGER',
-      condominiumId: condominium.id,
+      condominiumId: firstCondominium.id,
     },
   })
 
@@ -80,7 +81,7 @@ async function main() {
       email: 'employee@condely.com',
       phone: '(11) 99999-0003',
       role: 'EMPLOYEE',
-      condominiumId: condominium.id,
+      condominiumId: firstCondominium.id,
     },
   })
 
@@ -91,7 +92,7 @@ async function main() {
       email: 'resident1@condely.com',
       phone: '(11) 99999-0004',
       role: 'RESIDENT',
-      condominiumId: condominium.id,
+      condominiumId: firstCondominium.id,
     },
   })
 
@@ -101,13 +102,13 @@ async function main() {
       email: 'resident2@condely.com',
       phone: '(11) 99999-0005',
       role: 'RESIDENT',
-      condominiumId: condominium.id,
+      condominiumId: firstCondominium.id,
     },
   })
 
   console.log('✅ Seeding completo!')
   console.log(`📊 Criados:`)
-  console.log(`  - 1 condomínio: ${condominium.name}`)
+  console.log(`  - 9 condomínios dos recibos`)
   console.log(`  - 5 apartamentos`)
   console.log(`  - 5 usuários:`)
   console.log(`    Admin: ${admin.email} (senha: 123456)`)

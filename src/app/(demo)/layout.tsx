@@ -1,4 +1,5 @@
 import AdminPanelLayout from "@/components/admin-panel/admin-panel-layout";
+import { AuthGuard } from "@/components/auth/auth-guard";
 import { DebugUser } from "@/components/debug-user";
 
 export default function DemoLayout({
@@ -7,9 +8,11 @@ export default function DemoLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AdminPanelLayout>
-      {children}
-      <DebugUser />
-    </AdminPanelLayout>
+    <AuthGuard>
+      <AdminPanelLayout>
+        {children}
+        <DebugUser />
+      </AdminPanelLayout>
+    </AuthGuard>
   );
 }
