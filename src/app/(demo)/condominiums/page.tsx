@@ -1,11 +1,25 @@
+"use client";
+
+import { useState } from "react";
 import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { 
-  Building2, 
-  Plus, 
-  Search, 
-  Filter, 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Building2,
+  Plus,
+  Search,
+  Filter,
   MoreHorizontal,
   MapPin,
   Phone,
@@ -20,6 +34,7 @@ import {
 } from "lucide-react";
 
 export default function CondominiumsPage() {
+  const [dialogOpen, setDialogOpen] = useState(false);
   // Dados simulados baseados nos condomínios reais - substituir por dados reais da API
   const condominiums = [
     {
@@ -379,10 +394,68 @@ export default function CondominiumsPage() {
                   Visualize e gerencie todos os condomínios da sua carteira
                 </CardDescription>
               </div>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Novo Condomínio
-              </Button>
+              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Novo Condomínio
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[600px]">
+                  <DialogHeader>
+                    <DialogTitle>Novo Condomínio</DialogTitle>
+                    <DialogDescription>
+                      Adicione um novo condomínio à sua carteira
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="name">Nome do Condomínio *</Label>
+                      <Input
+                        id="name"
+                        placeholder="Condomínio Exemplo"
+                        required
+                      />
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label htmlFor="address">Endereço Completo *</Label>
+                      <Input
+                        id="address"
+                        placeholder="Rua Exemplo, 123 - Bairro - Cidade - UF"
+                        required
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="cnpj">CNPJ *</Label>
+                        <Input
+                          id="cnpj"
+                          placeholder="00.000.000/0001-00"
+                          required
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="phone">Telefone *</Label>
+                        <Input
+                          id="phone"
+                          placeholder="(00) 0000-0000"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                      Cancelar
+                    </Button>
+                    <Button onClick={() => setDialogOpen(false)}>
+                      Criar
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
           </CardHeader>
           <CardContent>

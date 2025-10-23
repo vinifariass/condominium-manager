@@ -66,6 +66,9 @@ Um sistema completo de gestão condominial desenvolvido em **Next.js 14** com **
 | shadcn/ui | Latest | Biblioteca de componentes |
 | Lucide React | Latest | Ícones modernos |
 | Radix UI | Latest | Primitivos acessíveis |
+| Prisma | 6.17 | ORM para banco de dados |
+| PostgreSQL | Latest | Banco de dados (via Supabase) |
+| Zod | 3.23 | Validação de schemas |
 
 ## 🚀 Início Rápido
 
@@ -73,6 +76,7 @@ Um sistema completo de gestão condominial desenvolvido em **Next.js 14** com **
 - Node.js 18.17+
 - npm, yarn ou pnpm
 - Git
+- Conta no [Supabase](https://supabase.com) (gratuita)
 
 ### Instalação
 
@@ -87,12 +91,32 @@ Um sistema completo de gestão condominial desenvolvido em **Next.js 14** com **
    npm install
    ```
 
-3. **Execute o projeto**
+3. **Configure o banco de dados** 📊
+
+   Siga o guia rápido: [QUICK_START.md](./QUICK_START.md)
+
+   Resumo:
+   ```bash
+   # 1. Crie projeto no Supabase
+   # 2. Configure .env com suas connection strings
+   cp .env.example .env
+
+   # 3. Gere Prisma Client
+   npm run db:generate
+
+   # 4. Aplique schema
+   npm run db:push
+
+   # 5. Popule com dados de exemplo
+   npm run db:seed
+   ```
+
+4. **Execute o projeto**
    ```bash
    npm run dev
    ```
 
-4. **Acesse o sistema**
+5. **Acesse o sistema**
    ```
    http://localhost:3000
    ```
@@ -170,16 +194,89 @@ O sistema suporta múltiplos condomínios com:
 - **Domínios**: Suporte a subdomínios ou domínios dedicados
 - **Escalabilidade**: Arquitetura preparada para crescimento
 
+## 🗄️ Banco de Dados
+
+O sistema utiliza **Prisma ORM** com **PostgreSQL** (via Supabase).
+
+### Modelos Principais
+- **Condominium**: Gestão de condomínios
+- **Apartment**: Unidades habitacionais
+- **Resident**: Moradores (proprietários, locatários, dependentes)
+- **Vehicle & Pet**: Veículos e pets
+- **Employee**: Funcionários
+- **CommonArea & Reservation**: Áreas comuns e reservas
+- **Visitor**: Controle de visitantes
+- **Ticket**: Sistema de chamados
+- **FinancialRecord**: Receitas e despesas
+- **Notification**: Notificações SMS/WhatsApp
+
+### Comandos do Banco
+```bash
+npm run db:generate  # Gerar Prisma Client
+npm run db:push      # Aplicar schema ao banco
+npm run db:migrate   # Criar migration
+npm run db:studio    # Abrir Prisma Studio (GUI)
+npm run db:seed      # Popular com dados de exemplo
+```
+
+### Documentação do Banco
+- [QUICK_START.md](./QUICK_START.md) - Setup rápido (5 min)
+- [PRISMA_SETUP.md](./PRISMA_SETUP.md) - Guia completo
+- [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md) - Estrutura detalhada
+
+### Documentação do Frontend
+- [DIALOGS_IMPLEMENTATION.md](./DIALOGS_IMPLEMENTATION.md) - Implementação de modais de criar/editar
+
+## 📡 API REST
+
+O sistema possui **5 APIs REST completas** com CRUD:
+
+- ✅ **Apartamentos** (`/api/apartments`)
+- ✅ **Moradores** (`/api/residents`)
+- ✅ **Reservas** (`/api/reservations`)
+- ✅ **Visitantes** (`/api/visitors`)
+- ✅ **Financeiro** (`/api/financial`)
+
+Todas com:
+- GET (listar com filtros)
+- POST (criar com validação)
+- PATCH (atualizar)
+- DELETE (remover)
+
+### Exemplo de Uso
+```typescript
+// Listar apartamentos
+const res = await fetch('/api/apartments?condominiumId=123')
+const apartments = await res.json()
+
+// Criar morador
+await fetch('/api/residents', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ name: 'João', type: 'OWNER', ... })
+})
+```
+
+### Guias das APIs
+- [API_QUICK_START.md](./API_QUICK_START.md) - Início rápido
+- [API_DOCUMENTATION.md](./API_DOCUMENTATION.md) - Documentação completa
+
 ## 🔮 Próximos Passos
 
 ### Backend
-- [ ] API Routes com Next.js
-- [ ] Banco de dados (PostgreSQL)
-- [ ] Autenticação (NextAuth.js)
+- [x] Banco de dados (PostgreSQL com Prisma)
+- [x] Schema completo do banco
+- [x] Seed com dados de exemplo
+- [x] API Routes com Next.js (5 APIs REST)
+- [x] Autenticação (NextAuth.js)
+- [x] Validações (Zod)
+- [ ] Conectar frontend às APIs
+- [ ] Middleware de autorização
+- [ ] Paginação nas APIs
 - [ ] Middleware multi-tenant
 
 ### Funcionalidades
-- [ ] Sistema de notificações
+- [ ] Sistema de notificações (estrutura pronta)
 - [ ] Relatórios em PDF
 - [ ] Upload de documentos
 - [ ] Chat em tempo real
@@ -187,7 +284,18 @@ O sistema suporta múltiplos condomínios com:
 
 ## 📚 Documentação
 
-- **[Documentação Completa](DOCUMENTATION_COMPLETE.md)**: Guia detalhado
+### Backend
+- **[API_QUICK_START.md](./API_QUICK_START.md)**: Início rápido com as APIs
+- **[API_DOCUMENTATION.md](./API_DOCUMENTATION.md)**: Documentação completa das APIs
+- **[IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md)**: Resumo da implementação
+
+### Banco de Dados
+- **[QUICK_START.md](./QUICK_START.md)**: Setup rápido do banco
+- **[PRISMA_SETUP.md](./PRISMA_SETUP.md)**: Guia completo Prisma + Supabase
+- **[DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md)**: Estrutura do banco
+
+### Frontend
+- **[Documentação Completa](DOCUMENTATION_COMPLETE.md)**: Guia detalhado do frontend
 - **[shadcn/ui](https://ui.shadcn.com/)**: Biblioteca de componentes
 - **[Next.js 14](https://nextjs.org/docs)**: Framework React
 - **[Tailwind CSS](https://tailwindcss.com/docs)**: CSS utilitário

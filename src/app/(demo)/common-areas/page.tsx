@@ -5,6 +5,17 @@ import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { 
   MapPin, 
   Plus, 
@@ -394,6 +405,7 @@ const ReserveAreaModal = ({
 export default function CommonAreasPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isReserveModalOpen, setIsReserveModalOpen] = useState(false);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedArea, setSelectedArea] = useState<CommonArea | null>(null);
   const [commonAreas, setCommonAreas] = useState<CommonArea[]>([
     {
@@ -747,10 +759,81 @@ export default function CommonAreasPage() {
                 <Filter className="h-4 w-4" />
                 Filtros
               </Button>
-              <Button className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                Nova Área
-              </Button>
+              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="flex items-center gap-2">
+                    <Plus className="h-4 w-4" />
+                    Nova Área
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[600px]">
+                  <DialogHeader>
+                    <DialogTitle>Nova Área Comum</DialogTitle>
+                    <DialogDescription>
+                      Adicione uma nova área comum ao condomínio
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="area-name">Nome da Área *</Label>
+                      <Input
+                        id="area-name"
+                        placeholder="Salão de Festas"
+                        required
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="area-type">Tipo *</Label>
+                        <Input
+                          id="area-type"
+                          placeholder="Festa, Esporte, Lazer..."
+                          required
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="capacity">Capacidade *</Label>
+                        <Input
+                          id="capacity"
+                          type="number"
+                          placeholder="50"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="hourly-rate">Taxa por Hora (R$) *</Label>
+                        <Input
+                          id="hourly-rate"
+                          type="number"
+                          placeholder="50.00"
+                          required
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="minimum-hours">Horas Mínimas *</Label>
+                        <Input
+                          id="minimum-hours"
+                          type="number"
+                          placeholder="2"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                      Cancelar
+                    </Button>
+                    <Button onClick={() => setIsAddDialogOpen(false)}>
+                      Criar
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
           </CardHeader>
         </Card>

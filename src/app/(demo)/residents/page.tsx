@@ -1,12 +1,26 @@
+"use client";
+
+import { useState } from "react";
 import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { 
-  Users, 
-  Plus, 
-  Search, 
-  Filter, 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Users,
+  Plus,
+  Search,
+  Filter,
   MoreHorizontal,
   Phone,
   Mail,
@@ -18,6 +32,7 @@ import {
 } from "lucide-react";
 
 export default function ResidentsPage() {
+  const [dialogOpen, setDialogOpen] = useState(false);
   // Dados simulados - substituir por dados reais da API
   const residents = [
     {
@@ -206,10 +221,78 @@ export default function ResidentsPage() {
                   Visualize e gerencie todos os moradores do condomínio
                 </CardDescription>
               </div>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Novo Morador
-              </Button>
+              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Novo Morador
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[600px]">
+                  <DialogHeader>
+                    <DialogTitle>Novo Morador</DialogTitle>
+                    <DialogDescription>
+                      Adicione um novo morador ao condomínio
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="name">Nome Completo *</Label>
+                      <Input
+                        id="name"
+                        placeholder="João Silva"
+                        required
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="cpf">CPF *</Label>
+                        <Input
+                          id="cpf"
+                          placeholder="000.000.000-00"
+                          required
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="phone">Telefone *</Label>
+                        <Input
+                          id="phone"
+                          placeholder="(11) 99999-9999"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          placeholder="joao@email.com"
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="apartment">Apartamento *</Label>
+                        <Input
+                          id="apartment"
+                          placeholder="101"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                      Cancelar
+                    </Button>
+                    <Button onClick={() => setDialogOpen(false)}>
+                      Criar
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
           </CardHeader>
           <CardContent>

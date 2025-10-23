@@ -1,7 +1,13 @@
+"use client";
+
+import { useState } from "react";
 import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { 
   Ticket, 
   Plus, 
@@ -30,6 +36,7 @@ import {
 } from "lucide-react";
 
 export default function TicketsPage() {
+  const [dialogOpen, setDialogOpen] = useState(false);
   // Dados simulados de chamados baseados nos condomínios reais
   const tickets = [
     {
@@ -491,10 +498,40 @@ export default function TicketsPage() {
               Gerencie os chamados de manutenção dos condomínios
             </p>
           </div>
-          <Button className="flex items-center gap-2">
-            <Plus className="h-4 w-4" />
-            Novo Chamado
-          </Button>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                Novo Chamado
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[600px]">
+              <DialogHeader>
+                <DialogTitle>Novo Chamado</DialogTitle>
+                <DialogDescription>Abra um novo chamado de manutenção ou solicitação</DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="title">Título *</Label>
+                  <Input id="title" placeholder="Descreva brevemente o problema" required />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="category">Categoria *</Label>
+                    <Input id="category" placeholder="Elétrica, Hidráulica..." required />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="priority">Prioridade *</Label>
+                    <Input id="priority" placeholder="Alta, Média, Baixa" required />
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
+                <Button onClick={() => setDialogOpen(false)}>Criar</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
 
         {/* Stats Cards */}

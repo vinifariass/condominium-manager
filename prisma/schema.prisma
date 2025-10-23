@@ -1,0 +1,526 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ============================================
+// NEXTAUTH MODELS
+// ============================================
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  password      String?
+  image         String?
+  role          UserRole  @default(USER)
+  condominiumId String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+
+  @@map("users")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ============================================
+// CONDOMINIUM MANAGEMENT MODELS
+// ============================================
+
+model Condominium {
+  id                String   @id @default(cuid())
+  name              String
+  cnpj              String   @unique
+  address           String
+  city              String
+  state             String
+  zipCode           String
+  phone             String
+  email             String
+  managerName       String
+  totalApartments   Int      @default(0)
+  totalResidents    Int      @default(0)
+  occupancyRate     Float    @default(0)
+  monthlyRevenue    Float    @default(0)
+  status            CondominiumStatus @default(ACTIVE)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  blocks            Block[]
+  apartments        Apartment[]
+  residents         Resident[]
+  employees         Employee[]
+  commonAreas       CommonArea[]
+  reservations      Reservation[]
+  tickets           Ticket[]
+  financialRecords  FinancialRecord[]
+  notifications     Notification[]
+  visitors          Visitor[]
+
+  @@map("condominiums")
+}
+
+model Block {
+  id              String   @id @default(cuid())
+  name            String
+  floors          Int
+  apartmentsCount Int
+  condominiumId   String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  condominium     Condominium @relation(fields: [condominiumId], references: [id], onDelete: Cascade)
+  apartments      Apartment[]
+
+  @@map("blocks")
+}
+
+model Apartment {
+  id              String   @id @default(cuid())
+  number          String
+  blockId         String?
+  condominiumId   String
+  floor           Int
+  area            Float
+  bedrooms        Int
+  bathrooms       Int
+  parkingSpots    Int      @default(0)
+  monthlyFee      Float
+  status          ApartmentStatus @default(VACANT)
+  balance         Float    @default(0)
+  lastPaymentDate DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  condominium     Condominium @relation(fields: [condominiumId], references: [id], onDelete: Cascade)
+  block           Block?      @relation(fields: [blockId], references: [id], onDelete: SetNull)
+  residents       Resident[]
+  vehicles        Vehicle[]
+  financialRecords FinancialRecord[]
+
+  @@unique([condominiumId, number])
+  @@map("apartments")
+}
+
+model Resident {
+  id                String   @id @default(cuid())
+  name              String
+  email             String?
+  phone             String
+  cpf               String   @unique
+  rg                String?
+  birthDate         DateTime?
+  type              ResidentType
+  apartmentId       String
+  condominiumId     String
+  moveInDate        DateTime @default(now())
+  moveOutDate       DateTime?
+  status            ResidentStatus @default(ACTIVE)
+  isOwner           Boolean  @default(false)
+  emergencyContactName   String?
+  emergencyContactPhone  String?
+  emergencyContactRelationship String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  apartment         Apartment    @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  condominium       Condominium  @relation(fields: [condominiumId], references: [id], onDelete: Cascade)
+  vehicles          Vehicle[]
+  pets              Pet[]
+  reservations      Reservation[]
+  tickets           Ticket[]
+  visitors          Visitor[]
+
+  @@map("residents")
+}
+
+model Vehicle {
+  id            String   @id @default(cuid())
+  plate         String   @unique
+  model         String
+  brand         String?
+  color         String?
+  year          Int?
+  residentId    String
+  apartmentId   String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  resident      Resident  @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  apartment     Apartment @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+
+  @@map("vehicles")
+}
+
+model Pet {
+  id          String   @id @default(cuid())
+  name        String
+  species     String
+  breed       String?
+  age         Int?
+  residentId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  resident    Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
+
+  @@map("pets")
+}
+
+model Employee {
+  id              String   @id @default(cuid())
+  name            String
+  email           String?
+  phone           String
+  cpf             String   @unique
+  role            String
+  salary          Float?
+  hireDate        DateTime @default(now())
+  terminationDate DateTime?
+  status          EmployeeStatus @default(ACTIVE)
+  condominiumId   String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  condominium     Condominium @relation(fields: [condominiumId], references: [id], onDelete: Cascade)
+
+  @@map("employees")
+}
+
+// ============================================
+// RESERVATION & COMMON AREAS MODELS
+// ============================================
+
+model CommonArea {
+  id              String   @id @default(cuid())
+  name            String
+  description     String?
+  capacity        Int
+  bookingFee      Float    @default(0)
+  requiresApproval Boolean @default(false)
+  status          CommonAreaStatus @default(AVAILABLE)
+  condominiumId   String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  condominium     Condominium   @relation(fields: [condominiumId], references: [id], onDelete: Cascade)
+  reservations    Reservation[]
+
+  @@map("common_areas")
+}
+
+model Reservation {
+  id              String   @id @default(cuid())
+  commonAreaId    String
+  residentId      String
+  condominiumId   String
+  date            DateTime
+  startTime       String
+  endTime         String
+  guests          Int      @default(0)
+  status          ReservationStatus @default(PENDING)
+  paymentStatus   PaymentStatus @default(PENDING)
+  amount          Float
+  observation     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  commonArea      CommonArea  @relation(fields: [commonAreaId], references: [id], onDelete: Cascade)
+  resident        Resident    @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  condominium     Condominium @relation(fields: [condominiumId], references: [id], onDelete: Cascade)
+
+  @@map("reservations")
+}
+
+// ============================================
+// VISITOR CONTROL MODELS
+// ============================================
+
+model Visitor {
+  id                String   @id @default(cuid())
+  name              String
+  phone             String?
+  document          String
+  visitingResidentId String
+  condominiumId     String
+  vehiclePlate      String?
+  company           String?
+  purpose           String
+  type              VisitorType @default(VISITOR)
+  status            VisitorStatus @default(WAITING)
+  arrivalTime       DateTime @default(now())
+  departureTime     DateTime?
+  authorizedBy      String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  visitingResident  Resident    @relation(fields: [visitingResidentId], references: [id], onDelete: Cascade)
+  condominium       Condominium @relation(fields: [condominiumId], references: [id], onDelete: Cascade)
+
+  @@map("visitors")
+}
+
+// ============================================
+// TICKET SYSTEM MODELS
+// ============================================
+
+model Ticket {
+  id              String   @id @default(cuid())
+  title           String
+  description     String
+  category        TicketCategory
+  priority        TicketPriority @default(MEDIUM)
+  status          TicketStatus @default(OPEN)
+  residentId      String
+  condominiumId   String
+  assignedTo      String?
+  resolvedAt      DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  resident        Resident    @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  condominium     Condominium @relation(fields: [condominiumId], references: [id], onDelete: Cascade)
+
+  @@map("tickets")
+}
+
+// ============================================
+// FINANCIAL MODELS
+// ============================================
+
+model FinancialRecord {
+  id              String   @id @default(cuid())
+  type            FinancialType
+  category        String
+  description     String
+  amount          Float
+  dueDate         DateTime?
+  paymentDate     DateTime?
+  paymentMethod   String?
+  status          PaymentStatus @default(PENDING)
+  apartmentId     String?
+  condominiumId   String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  apartment       Apartment?   @relation(fields: [apartmentId], references: [id], onDelete: SetNull)
+  condominium     Condominium  @relation(fields: [condominiumId], references: [id], onDelete: Cascade)
+
+  @@map("financial_records")
+}
+
+// ============================================
+// NOTIFICATION MODELS
+// ============================================
+
+model Notification {
+  id              String   @id @default(cuid())
+  title           String
+  message         String
+  type            NotificationType
+  recipientPhone  String
+  recipientName   String
+  method          NotificationMethod
+  status          NotificationStatus @default(PENDING)
+  sentAt          DateTime?
+  condominiumId   String
+  metadata        Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  condominium     Condominium @relation(fields: [condominiumId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  USER
+}
+
+enum CondominiumStatus {
+  ACTIVE
+  INACTIVE
+  MAINTENANCE
+}
+
+enum ApartmentStatus {
+  OCCUPIED
+  VACANT
+  MAINTENANCE
+  DEFAULTER
+}
+
+enum ResidentType {
+  OWNER
+  TENANT
+  DEPENDENT
+}
+
+enum ResidentStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  INACTIVE
+  ON_LEAVE
+}
+
+enum CommonAreaStatus {
+  AVAILABLE
+  UNAVAILABLE
+  MAINTENANCE
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  OVERDUE
+  REFUNDED
+  CANCELLED
+}
+
+enum VisitorType {
+  VISITOR
+  DELIVERY
+  SERVICE
+  CONTRACTOR
+}
+
+enum VisitorStatus {
+  WAITING
+  AUTHORIZED
+  DENIED
+  ENTERED
+  LEFT
+}
+
+enum TicketCategory {
+  MAINTENANCE
+  CLEANING
+  SECURITY
+  COMPLAINT
+  SUGGESTION
+  OTHER
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+  CANCELLED
+}
+
+enum FinancialType {
+  INCOME
+  EXPENSE
+}
+
+enum NotificationType {
+  VISITOR_ARRIVAL
+  DELIVERY
+  MAINTENANCE
+  PAYMENT_REMINDER
+  EMERGENCY
+  RESERVATION_CONFIRMATION
+  GENERAL
+}
+
+enum NotificationMethod {
+  SMS
+  WHATSAPP
+  EMAIL
+  PUSH
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  DELIVERED
+  FAILED
+}

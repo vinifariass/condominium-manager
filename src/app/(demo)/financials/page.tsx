@@ -1,6 +1,12 @@
+"use client";
+
+import { useState } from "react";
 import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { 
   DollarSign, 
   Plus, 
@@ -19,6 +25,7 @@ import {
 } from "lucide-react";
 
 export default function FinancialsPage() {
+  const [dialogOpen, setDialogOpen] = useState(false);
   // Dados simulados - substituir por dados reais da API
   const transactions = [
     {
@@ -284,10 +291,40 @@ export default function FinancialsPage() {
                   <Receipt className="h-4 w-4 mr-2" />
                   Relatórios
                 </Button>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Nova Transação
-                </Button>
+                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Nova Transação
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[600px]">
+                    <DialogHeader>
+                      <DialogTitle>Nova Transação</DialogTitle>
+                      <DialogDescription>Registre uma nova transação financeira</DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="description">Descrição *</Label>
+                        <Input id="description" placeholder="Descrição da transação" required />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="amount">Valor (R$) *</Label>
+                          <Input id="amount" type="number" placeholder="0.00" required />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="type">Tipo *</Label>
+                          <Input id="type" placeholder="Receita ou Despesa" required />
+                        </div>
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
+                      <Button onClick={() => setDialogOpen(false)}>Criar</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
           </CardHeader>

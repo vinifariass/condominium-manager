@@ -1,7 +1,21 @@
+"use client";
+
+import { useState } from "react";
 import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { 
   Users, 
   Plus, 
@@ -22,6 +36,7 @@ import {
 } from "lucide-react";
 
 export default function EmployeesPage() {
+  const [dialogOpen, setDialogOpen] = useState(false);
   // Dados simulados de funcionários baseados nos condomínios reais
   const employees = [
     {
@@ -340,10 +355,42 @@ export default function EmployeesPage() {
               Gerencie os funcionários dos condomínios
             </p>
           </div>
-          <Button className="flex items-center gap-2">
-            <Plus className="h-4 w-4" />
-            Novo Funcionário
-          </Button>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                Novo Funcionário
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[600px]">
+              <DialogHeader>
+                <DialogTitle>Novo Funcionário</DialogTitle>
+                <DialogDescription>
+                  Adicione um novo funcionário ao sistema
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="emp-name">Nome Completo *</Label>
+                  <Input id="emp-name" placeholder="João Silva" required />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="role">Cargo *</Label>
+                    <Input id="role" placeholder="Porteiro, Zelador..." required />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="emp-phone">Telefone *</Label>
+                    <Input id="emp-phone" placeholder="(00) 00000-0000" required />
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
+                <Button onClick={() => setDialogOpen(false)}>Criar</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
 
         {/* Stats Cards */}
