@@ -1,11 +1,12 @@
 "use client";
-import { Menu } from "@/components/admin-panel/menu";
+import { MenuNextAuth } from "@/components/admin-panel/menu-nextauth";
 import { SidebarToggle } from "@/components/admin-panel/sidebar-toggle";
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/hooks/use-sidebar";
 import { useStore } from "@/hooks/use-store";
 import { cn } from "@/lib/utils";
 import { PanelsTopLeft } from "lucide-react";
+import CondominiumIcon from "@/components/ui/condominium-icon";
 import Link from "next/link";
 
 export function Sidebar() {
@@ -35,7 +36,10 @@ export function Sidebar() {
           asChild
         >
           <Link href="/dashboard" className="flex items-center gap-2">
-            <PanelsTopLeft className="w-6 h-6 mr-1" />
+            <CondominiumIcon 
+              className="w-6 h-6 mr-1 text-blue-600 dark:text-white hover:text-blue-700 dark:hover:text-blue-200 transition-colors drop-shadow-sm" 
+              size={24}
+            />
             <h1
               className={cn(
                 "font-bold text-lg whitespace-nowrap transition-[transform,opacity,display] ease-in-out duration-300",
@@ -44,11 +48,11 @@ export function Sidebar() {
                   : "translate-x-0 opacity-100"
               )}
             >
-              Brand
+              Condely
             </h1>
           </Link>
         </Button>
-        <Menu isOpen={getOpenState()} />
+        <MenuNextAuth isOpen={getOpenState()} />
       </div>
     </aside>
   );

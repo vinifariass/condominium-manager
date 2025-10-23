@@ -7,7 +7,19 @@
       "Bash(npm install:*)",
       "Bash(npx prisma init:*)",
       "Bash(npm run db:generate:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(git checkout:*)",
+      "Bash(git add:*)",
+      "Bash(for file in \"./src/app/(demo)/apartments/page.tsx\" \"./src/app/(demo)/common-areas/page.tsx\" \"./src/app/(demo)/condominiums/page.tsx\" \"./src/app/(demo)/employees/page.tsx\" \"./src/app/(demo)/financials/page.tsx\" \"./src/app/(demo)/residents/page.tsx\" \"./src/app/(demo)/tickets/page.tsx\")",
+      "Bash(do)",
+      "Bash(if [ -f \"$file\" ])",
+      "Bash(then)",
+      "Bash(echo:*)",
+      "Bash(fi)",
+      "Bash(done)",
+      "Bash(for file in \"./src/app/(demo)/financials/expenses/page.tsx\" \"./src/app/(demo)/financials/fees/page.tsx\" \"./src/app/(demo)/financials/income/page.tsx\" \"./src/app/(demo)/financials/page-new.tsx\" \"./prisma/seed.ts\")",
+      "Bash(for file in \"./src/app/api/residents/route.ts\" \"./src/components/ui/dialog.tsx\" \"./src/components/ui/input.tsx\" \"./src/components/ui/select.tsx\" \"./src/components/ui/tabs.tsx\" \"./src/components/ui/textarea.tsx\" \"./src/lib/auth.ts\" \"./src/lib/prisma.ts\" \"./src/types/next-auth.d.ts\")",
+      "Bash(1)"
     ],
     "deny": [],
     "ask": []

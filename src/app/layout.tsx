@@ -4,6 +4,9 @@ import { GeistSans } from "geist/font/sans";
 import "./globals.css";
 
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { AuthProvider } from "@/components/providers/auth-provider";
+import { Toaster } from 'sonner';
+import { useEffect } from "react";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -13,9 +16,9 @@ export const metadata: Metadata = {
       ? `https://${process.env.VERCEL_URL}`
       : `http://localhost:${process.env.PORT || 3000}`
   ),
-  title: "Condominium Dashboard",
+  title: "Condely - Sistema de Gestão Condominial",
   description:
-    "A stunning and functional retractable sidebar for Next.js built on top of shadcn/ui complete with desktop and mobile responsiveness.",
+    "Sistema completo de gestão condominial com controle de visitantes, financeiro, manutenção e muito mais. Interface moderna e responsiva.",
   alternates: {
     canonical: "/"
   },
@@ -42,9 +45,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={GeistSans.className}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {children}
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            {children}
+            <Toaster richColors />
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );

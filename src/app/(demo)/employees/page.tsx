@@ -1,21 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { NewEmployeeModal } from "@/components/new-employee-modal";
+import { ViewEmployeeModal } from "@/components/view-employee-modal";
+import { EditEmployeeModal } from "@/components/edit-employee-modal";
+import { EmployeeActionsMenu } from "@/components/employee-actions-menu";
+import { EmployeeFilters } from "@/components/employee-filters";
+import { BulkExportModal } from "@/components/bulk-export-modal";
 import { 
   Users, 
   Plus, 
@@ -32,13 +27,37 @@ import {
   UserX,
   Calendar,
   DollarSign,
-  MapPin
+  MapPin,
+  Download,
+  RefreshCw
 } from "lucide-react";
 
+interface Employee {
+  id: number;
+  name: string;
+  role: string;
+  condominium: string;
+  condominiumId: number;
+  email: string;
+  phone: string;
+  document: string;
+  salary: number;
+  status: string;
+  admissionDate: string;
+  shift: string;
+  address: string;
+  emergencyContact: string;
+  benefits: string[];
+}
+
 export default function EmployeesPage() {
-  const [dialogOpen, setDialogOpen] = useState(false);
-  // Dados simulados de funcionários baseados nos condomínios reais
-  const employees = [
+  const [isNewEmployeeModalOpen, setIsNewEmployeeModalOpen] = useState(false);
+  const [isViewEmployeeModalOpen, setIsViewEmployeeModalOpen] = useState(false);
+  const [isEditEmployeeModalOpen, setIsEditEmployeeModalOpen] = useState(false);
+  const [isFiltersModalOpen, setIsFiltersModalOpen] = useState(false);
+  const [isBulkExportModalOpen, setIsBulkExportModalOpen] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [allEmployees, setAllEmployees] = useState<Employee[]>([
     {
       id: 1,
       name: "João Silva",
@@ -294,7 +313,97 @@ export default function EmployeesPage() {
       emergencyContact: "Marcos Costa - (21) 98888-4444",
       benefits: ["Vale Transporte", "Vale Alimentação"]
     }
-  ];
+  ]);
+
+  const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
+  const [filters, setFilters] = useState({
+    searchTerm: "",
+    selectedCondominiums: [] as number[],
+    selectedRoles: [] as string[],
+    selectedStatuses: [] as string[],
+    salaryMin: "",
+    salaryMax: "",
+    admissionDateFrom: "",
+    admissionDateTo: "",
+    selectedBenefits: [] as string[]
+  });
+
+  // Initialize filtered employees with all employees
+  useEffect(() => {
+    setFilteredEmployees(allEmployees);
+  }, [allEmployees]);
+
+  const handleCreateEmployee = (newEmployee: Employee) => {
+    setAllEmployees(prev => [...prev, newEmployee]);
+    setFilteredEmployees(prev => [...prev, newEmployee]);
+  };
+
+  const handleViewEmployee = (employee: Employee) => {
+    setSelectedEmployee(employee);
+    setIsViewEmployeeModalOpen(true);
+  };
+
+  const handleEditEmployee = (employee: Employee) => {
+    setSelectedEmployee(employee);
+    setIsEditEmployeeModalOpen(true);
+  };
+
+  const handleUpdateEmployee = (updatedEmployee: Employee) => {
+    setAllEmployees(prev => 
+      prev.map(emp => 
+        emp.id === updatedEmployee.id ? updatedEmployee : emp
+      )
+    );
+    setFilteredEmployees(prev => 
+      prev.map(emp => 
+        emp.id === updatedEmployee.id ? updatedEmployee : emp
+      )
+    );
+  };
+
+  const handleDeleteEmployee = (employeeId: number) => {
+    setAllEmployees(prev => prev.filter(emp => emp.id !== employeeId));
+    setFilteredEmployees(prev => prev.filter(emp => emp.id !== employeeId));
+  };
+
+  const handleDeactivateEmployee = (deactivatedEmployee: Employee) => {
+    setAllEmployees(prev => 
+      prev.map(emp => 
+        emp.id === deactivatedEmployee.id ? deactivatedEmployee : emp
+      )
+    );
+    setFilteredEmployees(prev => 
+      prev.map(emp => 
+        emp.id === deactivatedEmployee.id ? deactivatedEmployee : emp
+      )
+    );
+  };
+
+  const handleFiltersApply = (filtered: Employee[]) => {
+    setFilteredEmployees(filtered);
+  };
+
+  const handleFiltersChange = (newFilters: typeof filters) => {
+    setFilters(newFilters);
+  };
+
+  const resetFilters = () => {
+    setFilters({
+      searchTerm: "",
+      selectedCondominiums: [],
+      selectedRoles: [],
+      selectedStatuses: [],
+      salaryMin: "",
+      salaryMax: "",
+      admissionDateFrom: "",
+      admissionDateTo: "",
+      selectedBenefits: []
+    });
+    setFilteredEmployees(allEmployees);
+  };
+
+  // Use filteredEmployees instead of employees for display
+  const displayEmployees = filteredEmployees;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -355,42 +464,13 @@ export default function EmployeesPage() {
               Gerencie os funcionários dos condomínios
             </p>
           </div>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                Novo Funcionário
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px]">
-              <DialogHeader>
-                <DialogTitle>Novo Funcionário</DialogTitle>
-                <DialogDescription>
-                  Adicione um novo funcionário ao sistema
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="emp-name">Nome Completo *</Label>
-                  <Input id="emp-name" placeholder="João Silva" required />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="role">Cargo *</Label>
-                    <Input id="role" placeholder="Porteiro, Zelador..." required />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="emp-phone">Telefone *</Label>
-                    <Input id="emp-phone" placeholder="(00) 00000-0000" required />
-                  </div>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-                <Button onClick={() => setDialogOpen(false)}>Criar</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Button 
+            className="flex items-center gap-2"
+            onClick={() => setIsNewEmployeeModalOpen(true)}
+          >
+            <Plus className="h-4 w-4" />
+            Novo Funcionário
+          </Button>
         </div>
 
         {/* Stats Cards */}
@@ -401,7 +481,7 @@ export default function EmployeesPage() {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{employees.length}</div>
+              <div className="text-2xl font-bold">{allEmployees.length}</div>
               <p className="text-xs text-muted-foreground">
                 +2 novos este mês
               </p>
@@ -415,10 +495,10 @@ export default function EmployeesPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">
-                {employees.filter(emp => emp.status === "Ativo").length}
+                {allEmployees.filter(emp => emp.status === "Ativo").length}
               </div>
               <p className="text-xs text-muted-foreground">
-                {((employees.filter(emp => emp.status === "Ativo").length / employees.length) * 100).toFixed(1)}% do total
+                {((allEmployees.filter(emp => emp.status === "Ativo").length / allEmployees.length) * 100).toFixed(1)}% do total
               </p>
             </CardContent>
           </Card>
@@ -430,7 +510,7 @@ export default function EmployeesPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {formatSalary(employees.reduce((total, emp) => total + emp.salary, 0))}
+                {formatSalary(allEmployees.reduce((total, emp) => total + emp.salary, 0))}
               </div>
               <p className="text-xs text-muted-foreground">
                 Total mensal
@@ -445,7 +525,7 @@ export default function EmployeesPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {new Set(employees.map(emp => emp.condominiumId)).size}
+                {new Set(allEmployees.map(emp => emp.condominiumId)).size}
               </div>
               <p className="text-xs text-muted-foreground">
                 Diferentes unidades
@@ -464,15 +544,85 @@ export default function EmployeesPage() {
                   <input
                     type="text"
                     placeholder="Buscar funcionários..."
+                    value={filters.searchTerm}
+                    onChange={(e) => {
+                      const newFilters = { ...filters, searchTerm: e.target.value };
+                      setFilters(newFilters);
+                      // Apply search immediately
+                      if (e.target.value) {
+                        const searchLower = e.target.value.toLowerCase();
+                        const filtered = allEmployees.filter(emp => 
+                          emp.name.toLowerCase().includes(searchLower) ||
+                          emp.email.toLowerCase().includes(searchLower) ||
+                          emp.phone.includes(searchLower) ||
+                          emp.document.includes(searchLower)
+                        );
+                        setFilteredEmployees(filtered);
+                      } else {
+                        setFilteredEmployees(allEmployees);
+                      }
+                    }}
                     className="pl-10 pr-4 py-2 w-full border border-input rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:border-input"
                   />
                 </div>
               </div>
-              <Button variant="outline" className="flex items-center gap-2">
-                <Filter className="h-4 w-4" />
-                Filtros
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  className="flex items-center gap-2"
+                  onClick={() => setIsFiltersModalOpen(true)}
+                >
+                  <Filter className="h-4 w-4" />
+                  Filtros Avançados
+                  {(filters.selectedCondominiums.length > 0 || 
+                    filters.selectedRoles.length > 0 || 
+                    filters.selectedStatuses.length > 0 ||
+                    filters.salaryMin || filters.salaryMax ||
+                    filters.admissionDateFrom || filters.admissionDateTo ||
+                    filters.selectedBenefits.length > 0) && (
+                    <Badge variant="default" className="ml-1 h-5 w-5 p-0 text-xs">
+                      {[
+                        filters.selectedCondominiums.length > 0 ? 1 : 0,
+                        filters.selectedRoles.length > 0 ? 1 : 0,
+                        filters.selectedStatuses.length > 0 ? 1 : 0,
+                        filters.salaryMin || filters.salaryMax ? 1 : 0,
+                        filters.admissionDateFrom || filters.admissionDateTo ? 1 : 0,
+                        filters.selectedBenefits.length > 0 ? 1 : 0
+                      ].reduce((a, b) => a + b, 0)}
+                    </Badge>
+                  )}
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="flex items-center gap-2"
+                  onClick={() => setIsBulkExportModalOpen(true)}
+                >
+                  <Download className="h-4 w-4" />
+                  Exportar
+                </Button>
+                {(filters.searchTerm || 
+                  filters.selectedCondominiums.length > 0 || 
+                  filters.selectedRoles.length > 0 || 
+                  filters.selectedStatuses.length > 0 ||
+                  filters.salaryMin || filters.salaryMax ||
+                  filters.admissionDateFrom || filters.admissionDateTo ||
+                  filters.selectedBenefits.length > 0) && (
+                  <Button 
+                    variant="outline" 
+                    className="flex items-center gap-2"
+                    onClick={resetFilters}
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                    Limpar
+                  </Button>
+                )}
+              </div>
             </div>
+            {displayEmployees.length !== allEmployees.length && (
+              <div className="text-sm text-muted-foreground">
+                Mostrando {displayEmployees.length} de {allEmployees.length} funcionário(s)
+              </div>
+            )}
           </CardHeader>
         </Card>
 
@@ -486,7 +636,7 @@ export default function EmployeesPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {employees.map((employee) => (
+              {displayEmployees.map((employee) => (
                 <div
                   key={employee.id}
                   className="flex flex-col lg:flex-row lg:items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors dark:border-border"
@@ -554,23 +704,73 @@ export default function EmployeesPage() {
                   </div>
 
                   <div className="flex items-center gap-2 mt-4 lg:mt-0">
-                    <Button variant="outline" size="sm" className="flex items-center gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex items-center gap-2"
+                      onClick={() => handleViewEmployee(employee)}
+                    >
                       <Eye className="h-4 w-4" />
                       Ver
                     </Button>
-                    <Button variant="outline" size="sm" className="flex items-center gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex items-center gap-2"
+                      onClick={() => handleEditEmployee(employee)}
+                    >
                       <Edit className="h-4 w-4" />
                       Editar
                     </Button>
-                    <Button variant="outline" size="sm">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
+                    <EmployeeActionsMenu
+                      employee={employee}
+                      onEdit={handleEditEmployee}
+                      onView={handleViewEmployee}
+                      onDelete={handleDeleteEmployee}
+                      onDeactivate={handleDeactivateEmployee}
+                    />
                   </div>
                 </div>
               ))}
             </div>
           </CardContent>
         </Card>
+
+        {/* Modais */}
+        <NewEmployeeModal
+          open={isNewEmployeeModalOpen}
+          onOpenChange={setIsNewEmployeeModalOpen}
+          onEmployeeCreate={handleCreateEmployee}
+        />
+
+        <ViewEmployeeModal
+          open={isViewEmployeeModalOpen}
+          onOpenChange={setIsViewEmployeeModalOpen}
+          employee={selectedEmployee}
+          onEdit={handleEditEmployee}
+        />
+
+        <EditEmployeeModal
+          open={isEditEmployeeModalOpen}
+          onOpenChange={setIsEditEmployeeModalOpen}
+          employee={selectedEmployee}
+          onEmployeeUpdate={handleUpdateEmployee}
+        />
+
+        <EmployeeFilters
+          open={isFiltersModalOpen}
+          onOpenChange={setIsFiltersModalOpen}
+          employees={allEmployees}
+          onFiltersApply={handleFiltersApply}
+          filters={filters}
+          onFiltersChange={handleFiltersChange}
+        />
+
+        <BulkExportModal
+          open={isBulkExportModalOpen}
+          onOpenChange={setIsBulkExportModalOpen}
+          employees={displayEmployees}
+        />
       </div>
     </ContentLayout>
   );
