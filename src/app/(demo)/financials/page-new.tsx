@@ -28,12 +28,11 @@ import {
   X
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { 
-  getFinancials, 
-  getFinancialStats, 
-  FINANCIAL_FILTER_OPTIONS,
+import {
+  getFinancials,
+  getFinancialStats,
   type FinancialData,
-  type FinancialFilters 
+  type FinancialFilters
 } from "@/lib/actions/financial.actions";
 
 export default function FinancialsPage() {

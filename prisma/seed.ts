@@ -43,6 +43,10 @@ async function main() {
       data: {
         number: `${i}01`,
         floor: i,
+        area: 75.5,
+        bedrooms: 3,
+        bathrooms: 2,
+        monthlyFee: 450.00,
         blockId: block.id,
         condominiumId: firstCondominium.id,
       },
@@ -58,7 +62,6 @@ async function main() {
     data: {
       name: 'Admin Sistema',
       email: 'admin@condely.com',
-      phone: '(11) 99999-0001',
       role: 'ADMIN',
       condominiumId: firstCondominium.id,
     },
@@ -69,30 +72,27 @@ async function main() {
     data: {
       name: 'João Silva',
       email: 'manager@condely.com',
-      phone: '(11) 99999-0002',
       role: 'MANAGER',
       condominiumId: firstCondominium.id,
     },
   })
 
-  // Employee
+  // User (Employee)
   const employee = await prisma.user.create({
     data: {
       name: 'Maria Santos',
       email: 'employee@condely.com',
-      phone: '(11) 99999-0003',
-      role: 'EMPLOYEE',
+      role: 'USER',
       condominiumId: firstCondominium.id,
     },
   })
 
-  // Residents
+  // Users (Residents)
   const resident1 = await prisma.user.create({
     data: {
       name: 'Carlos Oliveira',
       email: 'resident1@condely.com',
-      phone: '(11) 99999-0004',
-      role: 'RESIDENT',
+      role: 'USER',
       condominiumId: firstCondominium.id,
     },
   })
@@ -101,8 +101,7 @@ async function main() {
     data: {
       name: 'Ana Costa',
       email: 'resident2@condely.com',
-      phone: '(11) 99999-0005',
-      role: 'RESIDENT',
+      role: 'USER',
       condominiumId: firstCondominium.id,
     },
   })
