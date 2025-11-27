@@ -5,7 +5,7 @@ import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
+import {
   UserCheck,
   Users,
   Phone,
@@ -23,6 +23,13 @@ import {
   Smartphone,
   MessageCircle
 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { notificationService } from "@/lib/notification-service";
 
 interface Visitor {
@@ -93,7 +100,7 @@ export default function VisitorControlPage() {
   // Simular chegada de visitante e enviar notificação
   const handleNotifyResident = async (visitor: Visitor) => {
     setIsLoading(visitor.id);
-    
+
     try {
       if (visitor.type === 'visitor') {
         // Notificação para visitante comum
@@ -132,8 +139,8 @@ export default function VisitorControlPage() {
       }
 
       // Atualizar status do visitante
-      setVisitors(prev => prev.map(v => 
-        v.id === visitor.id 
+      setVisitors(prev => prev.map(v =>
+        v.id === visitor.id
           ? { ...v, status: 'authorized' as const }
           : v
       ));
@@ -149,7 +156,7 @@ export default function VisitorControlPage() {
   // Registrar novo visitante
   const handleRegisterVisitor = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const visitor: Visitor = {
       id: Date.now(),
       ...newVisitor,
@@ -158,10 +165,10 @@ export default function VisitorControlPage() {
     };
 
     setVisitors(prev => [visitor, ...prev]);
-    
+
     // Enviar notificação automaticamente
     await handleNotifyResident(visitor);
-    
+
     // Limpar formulário
     setNewVisitor({
       name: "",
@@ -224,7 +231,7 @@ export default function VisitorControlPage() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="flex items-center p-6">
               <div className="flex items-center space-x-2">
@@ -255,8 +262,8 @@ export default function VisitorControlPage() {
                 <Bell className="h-8 w-8 text-orange-500" />
                 <div>
                   <p className="text-2xl font-bold">
-                    {visitors.filter(v => 
-                      v.status === 'waiting' && 
+                    {visitors.filter(v =>
+                      v.status === 'waiting' &&
                       (Date.now() - v.arrivalTime.getTime()) > 300000 // 5 minutos
                     ).length}
                   </p>
@@ -280,23 +287,26 @@ export default function VisitorControlPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="text-sm font-medium">Tipo</label>
-                  <select
+                  <Select
                     value={newVisitor.type}
-                    onChange={(e) => setNewVisitor({...newVisitor, type: e.target.value as any})}
-                    className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background"
-                    required
+                    onValueChange={(value) => setNewVisitor({ ...newVisitor, type: value as any })}
                   >
-                    <option value="visitor">Visitante</option>
-                    <option value="delivery">Entrega</option>
-                    <option value="service">Prestador de Serviço</option>
-                  </select>
+                    <SelectTrigger className="w-full mt-1">
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="visitor">Visitante</SelectItem>
+                      <SelectItem value="delivery">Entrega</SelectItem>
+                      <SelectItem value="service">Prestador de Serviço</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <label className="text-sm font-medium">Nome do Visitante</label>
                   <input
                     type="text"
                     value={newVisitor.name}
-                    onChange={(e) => setNewVisitor({...newVisitor, name: e.target.value})}
+                    onChange={(e) => setNewVisitor({ ...newVisitor, name: e.target.value })}
                     className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background"
                     required
                   />
@@ -306,7 +316,7 @@ export default function VisitorControlPage() {
                   <input
                     type="tel"
                     value={newVisitor.phone}
-                    onChange={(e) => setNewVisitor({...newVisitor, phone: e.target.value})}
+                    onChange={(e) => setNewVisitor({ ...newVisitor, phone: e.target.value })}
                     className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background"
                     placeholder="(11) 99999-9999"
                   />
@@ -319,7 +329,7 @@ export default function VisitorControlPage() {
                   <input
                     type="text"
                     value={newVisitor.document}
-                    onChange={(e) => setNewVisitor({...newVisitor, document: e.target.value})}
+                    onChange={(e) => setNewVisitor({ ...newVisitor, document: e.target.value })}
                     className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background"
                     required
                   />
@@ -329,7 +339,7 @@ export default function VisitorControlPage() {
                   <input
                     type="text"
                     value={newVisitor.vehiclePlate}
-                    onChange={(e) => setNewVisitor({...newVisitor, vehiclePlate: e.target.value})}
+                    onChange={(e) => setNewVisitor({ ...newVisitor, vehiclePlate: e.target.value })}
                     className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background"
                     placeholder="ABC-1234"
                   />
@@ -342,7 +352,7 @@ export default function VisitorControlPage() {
                   <input
                     type="text"
                     value={newVisitor.visitingResident}
-                    onChange={(e) => setNewVisitor({...newVisitor, visitingResident: e.target.value})}
+                    onChange={(e) => setNewVisitor({ ...newVisitor, visitingResident: e.target.value })}
                     className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background"
                     required
                   />
@@ -352,7 +362,7 @@ export default function VisitorControlPage() {
                   <input
                     type="text"
                     value={newVisitor.apartment}
-                    onChange={(e) => setNewVisitor({...newVisitor, apartment: e.target.value})}
+                    onChange={(e) => setNewVisitor({ ...newVisitor, apartment: e.target.value })}
                     className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background"
                     required
                   />
@@ -362,7 +372,7 @@ export default function VisitorControlPage() {
                   <input
                     type="text"
                     value={newVisitor.block}
-                    onChange={(e) => setNewVisitor({...newVisitor, block: e.target.value})}
+                    onChange={(e) => setNewVisitor({ ...newVisitor, block: e.target.value })}
                     className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background"
                     required
                   />
@@ -372,7 +382,7 @@ export default function VisitorControlPage() {
                   <input
                     type="tel"
                     value={newVisitor.residentPhone}
-                    onChange={(e) => setNewVisitor({...newVisitor, residentPhone: e.target.value})}
+                    onChange={(e) => setNewVisitor({ ...newVisitor, residentPhone: e.target.value })}
                     className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background"
                     placeholder="(11) 98888-7777"
                     required
@@ -386,7 +396,7 @@ export default function VisitorControlPage() {
                   <input
                     type="text"
                     value={newVisitor.company}
-                    onChange={(e) => setNewVisitor({...newVisitor, company: e.target.value})}
+                    onChange={(e) => setNewVisitor({ ...newVisitor, company: e.target.value })}
                     className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background"
                     placeholder="Ex: Correios, Mercado Livre, etc."
                   />
@@ -398,7 +408,7 @@ export default function VisitorControlPage() {
                 <input
                   type="text"
                   value={newVisitor.purpose}
-                  onChange={(e) => setNewVisitor({...newVisitor, purpose: e.target.value})}
+                  onChange={(e) => setNewVisitor({ ...newVisitor, purpose: e.target.value })}
                   className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background"
                   placeholder="Ex: Visita pessoal, entrega de produtos, etc."
                   required
@@ -440,7 +450,7 @@ export default function VisitorControlPage() {
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                     <div>
                       <span className="font-medium">Visitando:</span> {visitor.visitingResident}
@@ -461,8 +471,8 @@ export default function VisitorControlPage() {
 
                   {visitor.status === 'waiting' && (
                     <div className="mt-4 flex gap-2">
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         onClick={() => handleNotifyResident(visitor)}
                         disabled={isLoading === visitor.id}
                         className="flex items-center gap-2"
@@ -474,21 +484,21 @@ export default function VisitorControlPage() {
                         )}
                         Notificar Morador
                       </Button>
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         variant="outline"
-                        onClick={() => setVisitors(prev => 
-                          prev.map(v => v.id === visitor.id ? {...v, status: 'authorized'} : v)
+                        onClick={() => setVisitors(prev =>
+                          prev.map(v => v.id === visitor.id ? { ...v, status: 'authorized' } : v)
                         )}
                       >
                         <CheckCircle className="h-4 w-4 mr-2" />
                         Autorizar
                       </Button>
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         variant="outline"
-                        onClick={() => setVisitors(prev => 
-                          prev.map(v => v.id === visitor.id ? {...v, status: 'denied'} : v)
+                        onClick={() => setVisitors(prev =>
+                          prev.map(v => v.id === visitor.id ? { ...v, status: 'denied' } : v)
                         )}
                       >
                         <XCircle className="h-4 w-4 mr-2" />

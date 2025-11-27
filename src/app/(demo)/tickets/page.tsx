@@ -16,6 +16,13 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Ticket,
   Plus,
   Search,
@@ -1388,44 +1395,50 @@ export default function TicketsPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium mb-2 block">Status</label>
-                    <select
-                      defaultValue={selectedTicket.status}
-                      className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                    >
-                      <option value="Aberto">Aberto</option>
-                      <option value="Em Andamento">Em Andamento</option>
-                      <option value="Aguardando Orçamento">Aguardando Orçamento</option>
-                      <option value="Concluído">Concluído</option>
-                    </select>
+                    <Select defaultValue={selectedTicket.status}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Selecione o status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Aberto">Aberto</SelectItem>
+                        <SelectItem value="Em Andamento">Em Andamento</SelectItem>
+                        <SelectItem value="Aguardando Orçamento">Aguardando Orçamento</SelectItem>
+                        <SelectItem value="Concluído">Concluído</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <label className="text-sm font-medium mb-2 block">Prioridade</label>
-                    <select
-                      defaultValue={selectedTicket.priority}
-                      className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                    >
-                      <option value="Baixa">Baixa</option>
-                      <option value="Média">Média</option>
-                      <option value="Alta">Alta</option>
-                    </select>
+                    <Select defaultValue={selectedTicket.priority}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Selecione a prioridade" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Baixa">Baixa</SelectItem>
+                        <SelectItem value="Média">Média</SelectItem>
+                        <SelectItem value="Alta">Alta</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium mb-2 block">Categoria</label>
-                    <select
-                      defaultValue={selectedTicket.category}
-                      className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                    >
-                      <option value="Hidráulica">Hidráulica</option>
-                      <option value="Elétrica">Elétrica</option>
-                      <option value="Segurança">Segurança</option>
-                      <option value="Climatização">Climatização</option>
-                      <option value="Tecnologia">Tecnologia</option>
-                      <option value="Manutenção">Manutenção</option>
-                      <option value="Limpeza">Limpeza</option>
-                    </select>
+                    <Select defaultValue={selectedTicket.category}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Selecione a categoria" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Hidráulica">Hidráulica</SelectItem>
+                        <SelectItem value="Elétrica">Elétrica</SelectItem>
+                        <SelectItem value="Segurança">Segurança</SelectItem>
+                        <SelectItem value="Climatização">Climatização</SelectItem>
+                        <SelectItem value="Tecnologia">Tecnologia</SelectItem>
+                        <SelectItem value="Manutenção">Manutenção</SelectItem>
+                        <SelectItem value="Limpeza">Limpeza</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <label className="text-sm font-medium mb-2 block">Condomínio</label>

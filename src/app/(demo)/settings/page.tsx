@@ -5,7 +5,7 @@ import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
+import {
   Settings,
   User,
   Bell,
@@ -29,6 +29,13 @@ import {
   Moon,
   Monitor
 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("profile");
@@ -92,11 +99,16 @@ export default function SettingsPage() {
             </div>
             <div>
               <label className="text-sm font-medium">Cargo</label>
-              <select className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background">
-                <option value="admin">Administrador</option>
-                <option value="manager">Gerente</option>
-                <option value="assistant">Assistente</option>
-              </select>
+              <Select defaultValue="admin">
+                <SelectTrigger className="w-full mt-1">
+                  <SelectValue placeholder="Selecione o cargo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="admin">Administrador</SelectItem>
+                  <SelectItem value="manager">Gerente</SelectItem>
+                  <SelectItem value="assistant">Assistente</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <div>
@@ -155,7 +167,7 @@ export default function SettingsPage() {
             <Button
               variant={notifications.email ? "default" : "outline"}
               size="sm"
-              onClick={() => setNotifications({...notifications, email: !notifications.email})}
+              onClick={() => setNotifications({ ...notifications, email: !notifications.email })}
             >
               {notifications.email ? <Check className="h-4 w-4" /> : "Ativar"}
             </Button>
@@ -172,7 +184,7 @@ export default function SettingsPage() {
             <Button
               variant={notifications.sms ? "default" : "outline"}
               size="sm"
-              onClick={() => setNotifications({...notifications, sms: !notifications.sms})}
+              onClick={() => setNotifications({ ...notifications, sms: !notifications.sms })}
             >
               {notifications.sms ? <Check className="h-4 w-4" /> : "Ativar"}
             </Button>
@@ -189,7 +201,7 @@ export default function SettingsPage() {
             <Button
               variant={notifications.push ? "default" : "outline"}
               size="sm"
-              onClick={() => setNotifications({...notifications, push: !notifications.push})}
+              onClick={() => setNotifications({ ...notifications, push: !notifications.push })}
             >
               {notifications.push ? <Check className="h-4 w-4" /> : "Ativar"}
             </Button>
@@ -206,7 +218,7 @@ export default function SettingsPage() {
             <Button
               variant={notifications.weeklyReport ? "default" : "outline"}
               size="sm"
-              onClick={() => setNotifications({...notifications, weeklyReport: !notifications.weeklyReport})}
+              onClick={() => setNotifications({ ...notifications, weeklyReport: !notifications.weeklyReport })}
             >
               {notifications.weeklyReport ? <Check className="h-4 w-4" /> : "Ativar"}
             </Button>
@@ -367,11 +379,16 @@ export default function SettingsPage() {
 
         <div>
           <h4 className="font-medium mb-3">Idioma</h4>
-          <select className="w-full md:w-auto px-3 py-2 border border-border rounded-md bg-background">
-            <option value="pt-BR">Português (Brasil)</option>
-            <option value="en-US">English (US)</option>
-            <option value="es-ES">Español</option>
-          </select>
+          <Select defaultValue="pt-BR">
+            <SelectTrigger className="w-full md:w-[180px]">
+              <SelectValue placeholder="Selecione o idioma" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="pt-BR">Português (Brasil)</SelectItem>
+              <SelectItem value="en-US">English (US)</SelectItem>
+              <SelectItem value="es-ES">Español</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </CardContent>
     </Card>
@@ -388,38 +405,58 @@ export default function SettingsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium">Fuso Horário</label>
-              <select className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background">
-                <option value="America/Sao_Paulo">América/São Paulo (GMT-3)</option>
-                <option value="America/New_York">América/Nova York (GMT-5)</option>
-                <option value="Europe/London">Europa/Londres (GMT+0)</option>
-              </select>
+              <Select defaultValue="America/Sao_Paulo">
+                <SelectTrigger className="w-full mt-1">
+                  <SelectValue placeholder="Selecione o fuso horário" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="America/Sao_Paulo">América/São Paulo (GMT-3)</SelectItem>
+                  <SelectItem value="America/New_York">América/Nova York (GMT-5)</SelectItem>
+                  <SelectItem value="Europe/London">Europa/Londres (GMT+0)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <label className="text-sm font-medium">Formato de Data</label>
-              <select className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background">
-                <option value="DD/MM/YYYY">DD/MM/AAAA</option>
-                <option value="MM/DD/YYYY">MM/DD/AAAA</option>
-                <option value="YYYY-MM-DD">AAAA-MM-DD</option>
-              </select>
+              <Select defaultValue="DD/MM/YYYY">
+                <SelectTrigger className="w-full mt-1">
+                  <SelectValue placeholder="Selecione o formato" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="DD/MM/YYYY">DD/MM/AAAA</SelectItem>
+                  <SelectItem value="MM/DD/YYYY">MM/DD/AAAA</SelectItem>
+                  <SelectItem value="YYYY-MM-DD">AAAA-MM-DD</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium">Moeda</label>
-              <select className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background">
-                <option value="BRL">Real Brasileiro (R$)</option>
-                <option value="USD">Dólar Americano ($)</option>
-                <option value="EUR">Euro (€)</option>
-              </select>
+              <Select defaultValue="BRL">
+                <SelectTrigger className="w-full mt-1">
+                  <SelectValue placeholder="Selecione a moeda" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="BRL">Real Brasileiro (R$)</SelectItem>
+                  <SelectItem value="USD">Dólar Americano ($)</SelectItem>
+                  <SelectItem value="EUR">Euro (€)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <label className="text-sm font-medium">Itens por Página</label>
-              <select className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background">
-                <option value="10">10 itens</option>
-                <option value="25">25 itens</option>
-                <option value="50">50 itens</option>
-                <option value="100">100 itens</option>
-              </select>
+              <Select defaultValue="10">
+                <SelectTrigger className="w-full mt-1">
+                  <SelectValue placeholder="Selecione a quantidade" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10 itens</SelectItem>
+                  <SelectItem value="25">25 itens</SelectItem>
+                  <SelectItem value="50">50 itens</SelectItem>
+                  <SelectItem value="100">100 itens</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </CardContent>
@@ -476,12 +513,17 @@ export default function SettingsPage() {
           </div>
           <div>
             <label className="text-sm font-medium">Retenção de Backups</label>
-            <select className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background">
-              <option value="7">7 dias</option>
-              <option value="30">30 dias</option>
-              <option value="90">90 dias</option>
-              <option value="365">1 ano</option>
-            </select>
+            <Select defaultValue="30">
+              <SelectTrigger className="w-full mt-1">
+                <SelectValue placeholder="Selecione o período" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7">7 dias</SelectItem>
+                <SelectItem value="30">30 dias</SelectItem>
+                <SelectItem value="90">90 dias</SelectItem>
+                <SelectItem value="365">1 ano</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
@@ -589,9 +631,8 @@ export default function SettingsPage() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-muted transition-colors ${
-                      activeTab === tab.id ? "bg-muted border-r-2 border-primary" : ""
-                    }`}
+                    className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-muted transition-colors ${activeTab === tab.id ? "bg-muted border-r-2 border-primary" : ""
+                      }`}
                   >
                     <IconComponent className="h-4 w-4" />
                     <span className="font-medium">{tab.label}</span>
@@ -605,7 +646,7 @@ export default function SettingsPage() {
         {/* Conteúdo Principal */}
         <div className="flex-1">
           {renderContent()}
-          
+
           {/* Botões de Ação */}
           <div className="flex gap-3 mt-6">
             <Button onClick={handleSave}>

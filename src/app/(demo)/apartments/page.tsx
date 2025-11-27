@@ -13,6 +13,13 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Building2,
   Plus,
   Search,
@@ -75,7 +82,7 @@ const FILTER_OPTIONS = {
   type: ["Luxo", "Premium", "Padrão", "Compacto"],
   condominium: [
     "Condomínio Santos Dumont",
-    "Condomínio Barra Garden", 
+    "Condomínio Barra Garden",
     "Condomínio Praia Azul",
     "Condomínio Cachoeira Dourada",
     "Condomínio Recanto",
@@ -315,12 +322,12 @@ export default function ApartmentsPage() {
       // Filtro de pesquisa por texto
       if (filters.search) {
         const searchLower = filters.search.toLowerCase();
-        const matchesSearch = 
+        const matchesSearch =
           apartment.number.toLowerCase().includes(searchLower) ||
           apartment.owner.toLowerCase().includes(searchLower) ||
           apartment.condominium.toLowerCase().includes(searchLower) ||
           apartment.block.toLowerCase().includes(searchLower);
-        
+
         if (!matchesSearch) return false;
       }
 
@@ -362,7 +369,7 @@ export default function ApartmentsPage() {
       const newValues = currentValues.includes(value)
         ? currentValues.filter(v => v !== value)
         : [...currentValues, value];
-      
+
       return { ...prev, [filterType]: newValues };
     });
   };
@@ -516,7 +523,7 @@ export default function ApartmentsPage() {
                   />
                 </div>
               </div>
-              
+
               <div className="flex gap-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -528,7 +535,7 @@ export default function ApartmentsPage() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56">
                     {FILTER_OPTIONS.status.map(option => (
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         key={option}
                         onClick={() => toggleFilterOption('status', option)}
                         className="flex items-center justify-between"
@@ -559,7 +566,7 @@ export default function ApartmentsPage() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56">
                     {FILTER_OPTIONS.type.map(option => (
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         key={option}
                         onClick={() => toggleFilterOption('type', option)}
                         className="flex items-center justify-between"
@@ -590,7 +597,7 @@ export default function ApartmentsPage() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56">
                     {FILTER_OPTIONS.condominium.map((option: string) => (
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         key={option}
                         onClick={() => toggleFilterOption('condominium', option)}
                         className="flex items-center justify-between"
@@ -621,7 +628,7 @@ export default function ApartmentsPage() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56">
                     {FILTER_OPTIONS.bedrooms.map(option => (
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         key={option}
                         onClick={() => toggleFilterOption('bedrooms', option)}
                         className="flex items-center justify-between"
@@ -653,19 +660,19 @@ export default function ApartmentsPage() {
               <div>
                 <CardTitle>Lista de Apartamentos</CardTitle>
                 <CardDescription>
-                  {filteredApartments.length === allApartments.length 
+                  {filteredApartments.length === allApartments.length
                     ? `${allApartments.length} apartamentos cadastrados no sistema`
                     : `${filteredApartments.length} de ${allApartments.length} apartamentos`
                   }
                 </CardDescription>
               </div>
-              {(filters.search || filters.status.length > 0 || filters.type.length > 0 || 
+              {(filters.search || filters.status.length > 0 || filters.type.length > 0 ||
                 filters.condominium.length > 0 || filters.bedrooms.length > 0) && (
-                <Button variant="outline" onClick={clearAllFilters}>
-                  <X className="h-4 w-4 mr-2" />
-                  Limpar Filtros
-                </Button>
-              )}
+                  <Button variant="outline" onClick={clearAllFilters}>
+                    <X className="h-4 w-4 mr-2" />
+                    Limpar Filtros
+                  </Button>
+                )}
             </div>
           </CardHeader>
           <CardContent>
@@ -775,9 +782,9 @@ export default function ApartmentsPage() {
 
                   {/* Ações */}
                   <div className="flex items-center gap-2 mt-4 lg:mt-0">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="flex items-center gap-2"
                       onClick={() => openViewModal(apartment)}
                     >
@@ -800,7 +807,7 @@ export default function ApartmentsPage() {
                           Duplicar
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           onClick={() => handleDeleteApartment(apartment)}
                           className="text-red-600 focus:text-red-600"
                         >
@@ -830,7 +837,7 @@ export default function ApartmentsPage() {
                 <X className="h-5 w-5" />
               </Button>
             </div>
-            
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Informações Básicas */}
               <Card>
@@ -935,7 +942,7 @@ export default function ApartmentsPage() {
                 </CardContent>
               </Card>
             </div>
-            
+
             <div className="flex justify-end space-x-2 mt-6">
               <Button variant="outline" onClick={closeModals}>
                 Fechar
@@ -962,12 +969,12 @@ export default function ApartmentsPage() {
                 <XCircle className="h-5 w-5" />
               </Button>
             </div>
-            
+
             <form className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium mb-2 block">Número</label>
-                  <input 
+                  <input
                     type="text"
                     defaultValue={selectedApartment.number}
                     className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
@@ -975,7 +982,7 @@ export default function ApartmentsPage() {
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-2 block">Bloco</label>
-                  <input 
+                  <input
                     type="text"
                     defaultValue={selectedApartment.block}
                     className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
@@ -986,33 +993,37 @@ export default function ApartmentsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium mb-2 block">Status</label>
-                  <select 
-                    defaultValue={selectedApartment.status}
-                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                  >
-                    <option value="Ocupado">Ocupado</option>
-                    <option value="Vago">Vago</option>
-                    <option value="Manutenção">Manutenção</option>
-                  </select>
+                  <Select defaultValue={selectedApartment.status}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecione o status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Ocupado">Ocupado</SelectItem>
+                      <SelectItem value="Vago">Vago</SelectItem>
+                      <SelectItem value="Manutenção">Manutenção</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-2 block">Tipo</label>
-                  <select 
-                    defaultValue={selectedApartment.type}
-                    className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                  >
-                    <option value="Luxo">Luxo</option>
-                    <option value="Premium">Premium</option>
-                    <option value="Padrão">Padrão</option>
-                    <option value="Compacto">Compacto</option>
-                  </select>
+                  <Select defaultValue={selectedApartment.type}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Luxo">Luxo</SelectItem>
+                      <SelectItem value="Premium">Premium</SelectItem>
+                      <SelectItem value="Padrão">Padrão</SelectItem>
+                      <SelectItem value="Compacto">Compacto</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
                   <label className="text-sm font-medium mb-2 block">Quartos</label>
-                  <input 
+                  <input
                     type="number"
                     defaultValue={selectedApartment.bedrooms}
                     className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
@@ -1020,7 +1031,7 @@ export default function ApartmentsPage() {
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-2 block">Banheiros</label>
-                  <input 
+                  <input
                     type="number"
                     defaultValue={selectedApartment.bathrooms}
                     className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
@@ -1028,7 +1039,7 @@ export default function ApartmentsPage() {
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-2 block">Vagas</label>
-                  <input 
+                  <input
                     type="number"
                     defaultValue={selectedApartment.parkingSpaces}
                     className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
@@ -1036,7 +1047,7 @@ export default function ApartmentsPage() {
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-2 block">Área (m²)</label>
-                  <input 
+                  <input
                     type="number"
                     step="0.1"
                     defaultValue={selectedApartment.area}
@@ -1048,7 +1059,7 @@ export default function ApartmentsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium mb-2 block">Andar</label>
-                  <input 
+                  <input
                     type="number"
                     defaultValue={selectedApartment.floor}
                     className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
@@ -1056,7 +1067,7 @@ export default function ApartmentsPage() {
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-2 block">Número de Moradores</label>
-                  <input 
+                  <input
                     type="number"
                     defaultValue={selectedApartment.residents}
                     className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
@@ -1066,7 +1077,7 @@ export default function ApartmentsPage() {
 
               <div>
                 <label className="text-sm font-medium mb-2 block">Proprietário</label>
-                <input 
+                <input
                   type="text"
                   defaultValue={selectedApartment.owner}
                   className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
@@ -1076,7 +1087,7 @@ export default function ApartmentsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium mb-2 block">Telefone</label>
-                  <input 
+                  <input
                     type="text"
                     defaultValue={selectedApartment.ownerPhone}
                     className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
@@ -1084,7 +1095,7 @@ export default function ApartmentsPage() {
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-2 block">Email</label>
-                  <input 
+                  <input
                     type="email"
                     defaultValue={selectedApartment.ownerEmail}
                     className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
@@ -1095,7 +1106,7 @@ export default function ApartmentsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium mb-2 block">Taxa Mensal</label>
-                  <input 
+                  <input
                     type="number"
                     step="0.01"
                     defaultValue={selectedApartment.monthlyFee}
@@ -1104,7 +1115,7 @@ export default function ApartmentsPage() {
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-2 block">Saldo Devedor</label>
-                  <input 
+                  <input
                     type="number"
                     step="0.01"
                     defaultValue={selectedApartment.balanceDue}
@@ -1115,14 +1126,14 @@ export default function ApartmentsPage() {
 
               <div>
                 <label className="text-sm font-medium mb-2 block">Observações</label>
-                <textarea 
+                <textarea
                   defaultValue={selectedApartment.observations}
                   rows={3}
                   className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </div>
             </form>
-            
+
             <div className="flex justify-end space-x-2 mt-6">
               <Button variant="outline" onClick={closeModals}>
                 Cancelar
