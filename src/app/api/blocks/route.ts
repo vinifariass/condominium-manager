@@ -42,7 +42,6 @@ export async function GET(request: NextRequest) {
     const formattedBlocks = blocks.map(block => ({
       id: block.id,
       name: block.name,
-      description: block.description,
       apartmentCount: block._count.apartments,
       condominiumId: block.condominiumId
     }));

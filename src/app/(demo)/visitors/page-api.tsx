@@ -248,9 +248,12 @@ export default function VisitorsPageAPI() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>Gerenciar Visitantes</CardTitle>
-              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <Dialog open={dialogOpen} onOpenChange={(open) => {
+                setDialogOpen(open);
+                if (open) resetForm();
+              }}>
                 <DialogTrigger asChild>
-                  <Button onClick={resetForm}>
+                  <Button>
                     <Plus className="h-4 w-4 mr-2" />
                     Novo Visitante
                   </Button>

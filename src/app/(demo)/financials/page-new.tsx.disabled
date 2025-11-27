@@ -34,6 +34,7 @@ import {
   type FinancialData,
   type FinancialFilters
 } from "@/lib/actions/financial.actions";
+import { FINANCIAL_FILTER_OPTIONS } from "@/lib/constants";
 
 export default function FinancialsPage() {
   // Estados para filtros e dados

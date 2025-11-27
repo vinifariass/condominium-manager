@@ -8,7 +8,7 @@ export async function getCondominiums(): Promise<Condominium[]> {
         name: 'asc'
       }
     })
-    
+
     return condominiums.map(condominium => ({
       ...condominium,
       phone: condominium.phone || undefined,
@@ -17,10 +17,10 @@ export async function getCondominiums(): Promise<Condominium[]> {
       city: condominium.city || undefined,
       state: condominium.state || undefined,
       zipCode: condominium.zipCode || undefined,
-      manager: condominium.manager || undefined,
+      manager: condominium.managerName || undefined,
       status: condominium.status.toLowerCase() as "active" | "inactive" | "maintenance",
-      totalUnits: condominium.totalUnits || 0,
-      totalBlocks: condominium.totalBlocks || 0,
+      totalUnits: condominium.totalApartments || 0,
+      totalBlocks: 0,
     }))
   } catch (error) {
     console.error('Error fetching condominiums:', error)
@@ -38,9 +38,9 @@ export async function getCondominiumById(id: string): Promise<Condominium | null
     const condominium = await prisma.condominium.findUnique({
       where: { id }
     })
-    
+
     if (!condominium) return null
-    
+
     return {
       ...condominium,
       phone: condominium.phone || undefined,
@@ -49,10 +49,10 @@ export async function getCondominiumById(id: string): Promise<Condominium | null
       city: condominium.city || undefined,
       state: condominium.state || undefined,
       zipCode: condominium.zipCode || undefined,
-      manager: condominium.manager || undefined,
+      manager: condominium.managerName || undefined,
       status: condominium.status.toLowerCase() as "active" | "inactive" | "maintenance",
-      totalUnits: condominium.totalUnits || 0,
-      totalBlocks: condominium.totalBlocks || 0,
+      totalUnits: condominium.totalApartments || 0,
+      totalBlocks: 0,
     }
   } catch (error) {
     console.error('Error fetching condominium:', error)
@@ -62,13 +62,23 @@ export async function getCondominiumById(id: string): Promise<Condominium | null
 
 export async function createCondominium(data: Omit<Condominium, 'id' | 'createdAt' | 'updatedAt'>): Promise<Condominium> {
   try {
+    const { manager, totalUnits, totalBlocks, ...rest } = data;
     const condominium = await prisma.condominium.create({
       data: {
-        ...data,
+        ...rest,
+        cnpj: rest.cnpj || '',
+        address: rest.address || '',
+        city: rest.city || '',
+        state: rest.state || '',
+        zipCode: rest.zipCode || '',
+        phone: rest.phone || '',
+        email: rest.email || '',
+        managerName: manager || '',
+        totalApartments: totalUnits,
         status: data.status.toUpperCase() as "ACTIVE" | "INACTIVE" | "MAINTENANCE",
       }
     })
-    
+
     return {
       ...condominium,
       phone: condominium.phone || undefined,
@@ -77,10 +87,10 @@ export async function createCondominium(data: Omit<Condominium, 'id' | 'createdA
       city: condominium.city || undefined,
       state: condominium.state || undefined,
       zipCode: condominium.zipCode || undefined,
-      manager: condominium.manager || undefined,
+      manager: condominium.managerName || undefined,
       status: condominium.status.toLowerCase() as "active" | "inactive" | "maintenance",
-      totalUnits: condominium.totalUnits || 0,
-      totalBlocks: condominium.totalBlocks || 0,
+      totalUnits: condominium.totalApartments || 0,
+      totalBlocks: 0,
     }
   } catch (error) {
     console.error('Error creating condominium:', error)
@@ -93,22 +103,35 @@ export async function updateCondominium(id: string, data: Partial<Omit<Condomini
     console.log('🔧 [updateCondominiumData] Iniciando atualização no banco...');
     console.log('🔧 [updateCondominiumData] ID:', id);
     console.log('🔧 [updateCondominiumData] Dados recebidos:', data);
-    
+
     const updateData: any = { ...data }
+
+    if (updateData.manager) {
+      updateData.managerName = updateData.manager
+      delete updateData.manager
+    }
+
+    if (updateData.totalUnits) {
+      updateData.totalApartments = updateData.totalUnits
+      delete updateData.totalUnits
+    }
+
+    delete updateData.totalBlocks
+
     if (updateData.status) {
       console.log('🔧 [updateCondominiumData] Convertendo status para uppercase:', updateData.status);
       updateData.status = updateData.status.toUpperCase()
     }
-    
+
     console.log('🔧 [updateCondominiumData] Dados finais para o Prisma:', updateData);
-    
+
     const condominium = await prisma.condominium.update({
       where: { id },
       data: updateData
     })
-    
+
     console.log('✅ [updateCondominiumData] Condomínio atualizado no banco:', condominium);
-    
+
     const result = {
       ...condominium,
       phone: condominium.phone || undefined,
@@ -117,12 +140,12 @@ export async function updateCondominium(id: string, data: Partial<Omit<Condomini
       city: condominium.city || undefined,
       state: condominium.state || undefined,
       zipCode: condominium.zipCode || undefined,
-      manager: condominium.manager || undefined,
+      manager: condominium.managerName || undefined,
       status: condominium.status.toLowerCase() as "active" | "inactive" | "maintenance",
-      totalUnits: condominium.totalUnits || 0,
-      totalBlocks: condominium.totalBlocks || 0,
+      totalUnits: condominium.totalApartments || 0,
+      totalBlocks: 0,
     }
-    
+
     console.log('✅ [updateCondominiumData] Resultado formatado:', result);
     return result;
   } catch (error) {

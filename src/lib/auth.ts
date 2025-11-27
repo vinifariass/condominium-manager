@@ -20,7 +20,7 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         console.log("🔐 Auth.ts - Tentativa de login:", credentials?.email)
-        
+
         if (!credentials?.email || !credentials?.password) {
           console.log("❌ Auth.ts - Credenciais incompletas")
           return null
@@ -40,23 +40,34 @@ export const authOptions: NextAuthOptions = {
             return null
           }
 
-          // Para desenvolvimento, vamos aceitar qualquer senha por enquanto
-          // Em produção, você deve comparar com hash bcrypt
+          // Verificar senha
+          if (!user.password) {
+            console.log("❌ Auth.ts - Usuário sem senha cadastrada")
+            return null
+          }
+
+          const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
+          console.log("🔑 Auth.ts - Senha válida:", isPasswordValid)
+
+          if (!isPasswordValid) {
+            console.log("❌ Auth.ts - Senha incorreta")
+            return null
+          }
+
           console.log("✅ Auth.ts - Login autorizado para:", user.name)
-          
+
           const authUser = {
             id: user.id,
             email: user.email,
             name: user.name,
             image: user.image,
             role: user.role.toLowerCase(),
-            phone: user.phone,
             condominiumId: user.condominiumId,
           }
-          
+
           console.log("📤 Auth.ts - Retornando user:", authUser)
           return authUser
-          
+
         } catch (error) {
           console.error("❌ Auth.ts - Erro no banco:", error)
           return null
@@ -69,7 +80,6 @@ export const authOptions: NextAuthOptions = {
       console.log("🔄 Auth.ts - JWT Callback - User:", user, "Token antes:", token)
       if (user) {
         token.role = user.role
-        token.phone = user.phone || undefined
         token.condominiumId = user.condominiumId || undefined
       }
       console.log("🔄 Auth.ts - JWT Callback - Token depois:", token)
@@ -80,7 +90,6 @@ export const authOptions: NextAuthOptions = {
       if (token) {
         session.user.id = token.sub!
         session.user.role = token.role as string
-        session.user.phone = token.phone || null
         session.user.condominiumId = token.condominiumId || null
       }
       console.log("📋 Auth.ts - Session Callback - Session depois:", session)

@@ -57,11 +57,16 @@ async function main() {
   // Criar usuários
   console.log('👥 Criando usuários...')
   
+  // Senha padrão hashada com bcrypt: "123456"
+  const bcrypt = require('bcryptjs')
+  const hashedPassword = await bcrypt.hash('123456', 10)
+
   // Admin
   const admin = await prisma.user.create({
     data: {
       name: 'Admin Sistema',
       email: 'admin@condely.com',
+      password: hashedPassword,
       role: 'ADMIN',
       condominiumId: firstCondominium.id,
     },
@@ -72,6 +77,7 @@ async function main() {
     data: {
       name: 'João Silva',
       email: 'manager@condely.com',
+      password: hashedPassword,
       role: 'MANAGER',
       condominiumId: firstCondominium.id,
     },
@@ -82,6 +88,7 @@ async function main() {
     data: {
       name: 'Maria Santos',
       email: 'employee@condely.com',
+      password: hashedPassword,
       role: 'USER',
       condominiumId: firstCondominium.id,
     },
@@ -92,6 +99,7 @@ async function main() {
     data: {
       name: 'Carlos Oliveira',
       email: 'resident1@condely.com',
+      password: hashedPassword,
       role: 'USER',
       condominiumId: firstCondominium.id,
     },
@@ -101,6 +109,7 @@ async function main() {
     data: {
       name: 'Ana Costa',
       email: 'resident2@condely.com',
+      password: hashedPassword,
       role: 'USER',
       condominiumId: firstCondominium.id,
     },

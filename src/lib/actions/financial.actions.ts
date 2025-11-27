@@ -1,5 +1,7 @@
 "use server";
 
+import { FINANCIAL_FILTER_OPTIONS } from "@/lib/constants";
+
 // Interfaces para tipagem - preparado para backend/Prisma
 export interface FinancialData {
   id: number;
@@ -50,45 +52,7 @@ export interface FinancialFilters {
 
 // Função para obter opções de filtro - preparada para "use server"
 export async function getFinancialFilterOptions() {
-  return {
-    types: ["Receita", "Despesa"],
-    categories: {
-      receita: [
-        "Taxa de Condomínio",
-        "Fundo de Reserva",
-        "Multas",
-        "Aluguel de Espaços",
-        "Juros",
-        "Outras Receitas"
-      ],
-      despesa: [
-        "Manutenção",
-        "Limpeza",
-        "Segurança",
-        "Energia Elétrica",
-        "Água",
-        "Gás",
-        "Internet",
-        "Telefone",
-        "Seguros",
-        "Impostos",
-        "Salários",
-        "Benefícios",
-        "Materiais",
-        "Outras Despesas"
-      ]
-    },
-    status: ["Pendente", "Pago", "Atrasado", "Cancelado"],
-    paymentMethods: [
-      "Dinheiro",
-      "PIX",
-      "Cartão de Crédito",
-      "Cartão de Débito",
-      "Transferência Bancária",
-      "Boleto",
-      "Cheque"
-    ]
-  };
+  return FINANCIAL_FILTER_OPTIONS;
 }
 
 // Dados mockados - futuramente substituído por consultas ao Prisma
@@ -324,16 +288,16 @@ export async function getFinancials(filters: FinancialFilters = {}): Promise<{
     // Ordenação
     const sortBy = filters.sortBy || 'date';
     const sortOrder = filters.sortOrder || 'desc';
-    
+
     filteredFinancials.sort((a, b) => {
       let aValue: any = a[sortBy as keyof FinancialData];
       let bValue: any = b[sortBy as keyof FinancialData];
-      
+
       if (sortBy === 'date' || sortBy === 'dueDate' || sortBy === 'paidDate' || sortBy === 'createdAt' || sortBy === 'updatedAt') {
         aValue = new Date(aValue || 0);
         bValue = new Date(bValue || 0);
       }
-      
+
       if (sortOrder === 'asc') {
         return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
       } else {
@@ -345,11 +309,11 @@ export async function getFinancials(filters: FinancialFilters = {}): Promise<{
     const totalReceita = filteredFinancials
       .filter(f => f.type === 'Receita')
       .reduce((sum, f) => sum + f.amount, 0);
-    
+
     const totalDespesa = filteredFinancials
       .filter(f => f.type === 'Despesa')
       .reduce((sum, f) => sum + f.amount, 0);
-    
+
     const saldo = totalReceita - totalDespesa;
 
     // Paginação
@@ -357,7 +321,7 @@ export async function getFinancials(filters: FinancialFilters = {}): Promise<{
     const limit = filters.limit || 10;
     const totalCount = filteredFinancials.length;
     const totalPages = Math.ceil(totalCount / limit);
-    
+
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
     const paginatedFinancials = filteredFinancials.slice(startIndex, endIndex);
@@ -456,7 +420,7 @@ export async function getFinancialStats(condominiumId?: number): Promise<{
   try {
     // TODO: Substituir por agregações do Prisma
     let financials = MOCK_FINANCIALS;
-    
+
     if (condominiumId) {
       financials = financials.filter(f => f.condominiumId === condominiumId);
     }
@@ -516,7 +480,7 @@ export async function generateFinancialReport(filters: FinancialFilters): Promis
 }> {
   try {
     const result = await getFinancials(filters);
-    
+
     const summary = {
       totalReceita: result.totalReceita,
       totalDespesa: result.totalDespesa,

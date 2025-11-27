@@ -19,7 +19,14 @@
       "Bash(done)",
       "Bash(for file in \"./src/app/(demo)/financials/expenses/page.tsx\" \"./src/app/(demo)/financials/fees/page.tsx\" \"./src/app/(demo)/financials/income/page.tsx\" \"./src/app/(demo)/financials/page-new.tsx\" \"./prisma/seed.ts\")",
       "Bash(for file in \"./src/app/api/residents/route.ts\" \"./src/components/ui/dialog.tsx\" \"./src/components/ui/input.tsx\" \"./src/components/ui/select.tsx\" \"./src/components/ui/tabs.tsx\" \"./src/components/ui/textarea.tsx\" \"./src/lib/auth.ts\" \"./src/lib/prisma.ts\" \"./src/types/next-auth.d.ts\")",
-      "Bash(1)"
+      "Bash(1)",
+      "Bash(npm run db:push:*)",
+      "Bash(if [ -f .env ])",
+      "Bash(then echo \"Arquivo .env existe\")",
+      "Bash(else echo \"Arquivo .env NAO existe\")",
+      "Bash(npx prisma:*)",
+      "Bash(npm run db:seed:*)",
+      "Bash(npx tsx:*)"
     ],
     "deny": [],
     "ask": []

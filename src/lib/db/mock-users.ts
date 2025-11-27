@@ -72,7 +72,7 @@ export const userDb = {
   // Criar novo usuário
   create: async (data: CreateUserInput): Promise<User> => {
     await new Promise(resolve => setTimeout(resolve, 200))
-    
+
     const newUser: User = {
       id: (users.length + 1).toString(),
       ...data,
@@ -80,7 +80,7 @@ export const userDb = {
       createdAt: new Date(),
       updatedAt: new Date(),
     }
-    
+
     users.push(newUser)
     return newUser
   },
@@ -88,31 +88,31 @@ export const userDb = {
   // Atualizar usuário
   update: async (id: string, data: UpdateUserInput): Promise<User | null> => {
     await new Promise(resolve => setTimeout(resolve, 200))
-    
+
     const userIndex = users.findIndex(user => user.id === id)
     if (userIndex === -1) return null
-    
+
     users[userIndex] = {
       ...users[userIndex],
       ...data,
       updatedAt: new Date(),
     }
-    
+
     // Se estamos atualizando o usuário atual, atualizar também
-    if (currentUser.id === id) {
+    if (currentUser && currentUser.id === id) {
       currentUser = users[userIndex]
     }
-    
+
     return users[userIndex]
   },
 
   // Deletar usuário
   delete: async (id: string): Promise<boolean> => {
     await new Promise(resolve => setTimeout(resolve, 200))
-    
+
     const userIndex = users.findIndex(user => user.id === id)
     if (userIndex === -1) return false
-    
+
     users.splice(userIndex, 1)
     return true
   },
@@ -127,10 +127,10 @@ export const userDb = {
   // Definir usuário atual (para simulação de login)
   setCurrentUser: async (userId: string): Promise<User | null> => {
     await new Promise(resolve => setTimeout(resolve, 100))
-    
+
     console.log("MockDB: setCurrentUser called with userId:", userId)
-    console.log("MockDB: Available users:", users.map(u => ({id: u.id, name: u.name, role: u.role})))
-    
+    console.log("MockDB: Available users:", users.map(u => ({ id: u.id, name: u.name, role: u.role })))
+
     const user = users.find(u => u.id === userId)
     if (user) {
       currentUser = user

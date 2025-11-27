@@ -8,18 +8,18 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { 
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { 
-  Ticket, 
-  Plus, 
-  Search, 
-  Filter, 
+import {
+  Ticket,
+  Plus,
+  Search,
+  Filter,
   MoreHorizontal,
   Phone,
   Mail,
@@ -97,7 +97,7 @@ const FILTER_OPTIONS = {
   priority: ["Baixa", "Média", "Alta"],
   condominium: [
     "Condomínio Santos Dumont",
-    "Condomínio Vila Rica", 
+    "Condomínio Vila Rica",
     "Condomínio Artagus",
     "Condomínio Cachoeira Dourada"
   ],
@@ -121,6 +121,7 @@ export default function TicketsPage() {
   const [selectedTicket, setSelectedTicket] = useState<TicketData | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   // Função para abrir modal de visualização
   const openViewModal = (ticket: TicketData) => {
@@ -540,13 +541,13 @@ export default function TicketsPage() {
       // Filtro de pesquisa por texto
       if (filters.search) {
         const searchLower = filters.search.toLowerCase();
-        const matchesSearch = 
+        const matchesSearch =
           ticket.title.toLowerCase().includes(searchLower) ||
           ticket.description.toLowerCase().includes(searchLower) ||
           ticket.resident.toLowerCase().includes(searchLower) ||
           ticket.apartment.toLowerCase().includes(searchLower) ||
           ticket.condominium.toLowerCase().includes(searchLower);
-        
+
         if (!matchesSearch) return false;
       }
 
@@ -595,7 +596,7 @@ export default function TicketsPage() {
       const newValues = currentValues.includes(value)
         ? currentValues.filter(v => v !== value)
         : [...currentValues, value];
-      
+
       return { ...prev, [filterType]: newValues };
     });
   };
@@ -822,7 +823,7 @@ export default function TicketsPage() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56">
                     {FILTER_OPTIONS.status.map(option => (
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         key={option}
                         onClick={() => toggleFilterOption('status', option)}
                         className="flex items-center justify-between"
@@ -853,7 +854,7 @@ export default function TicketsPage() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56">
                     {FILTER_OPTIONS.condominium.map((option: string) => (
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         key={option}
                         onClick={() => toggleFilterOption('condominium', option)}
                         className="flex items-center justify-between"
@@ -884,7 +885,7 @@ export default function TicketsPage() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56">
                     {FILTER_OPTIONS.priority.map(option => (
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         key={option}
                         onClick={() => toggleFilterOption('priority', option)}
                         className="flex items-center justify-between"
@@ -915,7 +916,7 @@ export default function TicketsPage() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56">
                     {FILTER_OPTIONS.category.map(option => (
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         key={option}
                         onClick={() => toggleFilterOption('category', option)}
                         className="flex items-center justify-between"
@@ -946,7 +947,7 @@ export default function TicketsPage() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56">
                     {FILTER_OPTIONS.apartment.map(option => (
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         key={option}
                         onClick={() => toggleFilterOption('apartment', option)}
                         className="flex items-center justify-between"
@@ -1062,9 +1063,9 @@ export default function TicketsPage() {
                   </div>
 
                   <div className="flex items-center gap-2 mt-4 lg:mt-0">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="flex items-center gap-2"
                       onClick={() => openViewModal(ticket)}
                     >
@@ -1087,7 +1088,7 @@ export default function TicketsPage() {
                           Duplicar
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           onClick={() => handleDeleteTicket(ticket)}
                           className="text-red-600 focus:text-red-600"
                         >
@@ -1105,11 +1106,11 @@ export default function TicketsPage() {
 
         {/* Modal de Visualização de Ticket */}
         {isViewModalOpen && selectedTicket && (
-          <div 
+          <div
             className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
             onClick={closeModals}
           >
-            <div 
+            <div
               className="bg-background rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
@@ -1143,7 +1144,7 @@ export default function TicketsPage() {
                           <label className="font-medium text-sm">Descrição</label>
                           <p className="text-muted-foreground mt-1">{selectedTicket.description}</p>
                         </div>
-                        
+
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <label className="font-medium text-sm">Categoria</label>
@@ -1180,7 +1181,7 @@ export default function TicketsPage() {
                             <p className="text-muted-foreground mt-1">{formatDate(selectedTicket.updatedAt)}</p>
                           </div>
                         </div>
-                        
+
                         {selectedTicket.estimatedCompletion && (
                           <div>
                             <label className="font-medium text-sm">Previsão de Conclusão</label>
@@ -1250,7 +1251,7 @@ export default function TicketsPage() {
                             <p className="text-sm text-muted-foreground">Solicitante</p>
                           </div>
                         </div>
-                        
+
                         <div className="space-y-2">
                           <div className="flex items-center gap-2">
                             <Phone className="h-4 w-4 text-muted-foreground" />
@@ -1335,7 +1336,7 @@ export default function TicketsPage() {
                     </Card>
                   </div>
                 </div>
-                
+
                 {/* Botões do Modal */}
                 <div className="flex justify-end space-x-2 mt-6 px-6 pb-6">
                   <Button variant="outline" onClick={closeModals}>
@@ -1364,30 +1365,30 @@ export default function TicketsPage() {
                   <XCircle className="h-5 w-5" />
                 </Button>
               </div>
-              
+
               <form className="space-y-4">
                 <div>
                   <label className="text-sm font-medium mb-2 block">Título</label>
-                  <input 
+                  <input
                     type="text"
                     defaultValue={selectedTicket.title}
                     className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                   />
                 </div>
-                
+
                 <div>
                   <label className="text-sm font-medium mb-2 block">Descrição</label>
-                  <textarea 
+                  <textarea
                     defaultValue={selectedTicket.description}
                     rows={3}
                     className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium mb-2 block">Status</label>
-                    <select 
+                    <select
                       defaultValue={selectedTicket.status}
                       className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                     >
@@ -1399,7 +1400,7 @@ export default function TicketsPage() {
                   </div>
                   <div>
                     <label className="text-sm font-medium mb-2 block">Prioridade</label>
-                    <select 
+                    <select
                       defaultValue={selectedTicket.priority}
                       className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                     >
@@ -1409,11 +1410,11 @@ export default function TicketsPage() {
                     </select>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium mb-2 block">Categoria</label>
-                    <select 
+                    <select
                       defaultValue={selectedTicket.category}
                       className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                     >
@@ -1428,18 +1429,18 @@ export default function TicketsPage() {
                   </div>
                   <div>
                     <label className="text-sm font-medium mb-2 block">Condomínio</label>
-                    <input 
+                    <input
                       type="text"
                       defaultValue={selectedTicket.condominium}
                       className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                     />
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium mb-2 block">Apartamento</label>
-                    <input 
+                    <input
                       type="text"
                       defaultValue={selectedTicket.apartment}
                       className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
@@ -1447,18 +1448,18 @@ export default function TicketsPage() {
                   </div>
                   <div>
                     <label className="text-sm font-medium mb-2 block">Morador</label>
-                    <input 
+                    <input
                       type="text"
                       defaultValue={selectedTicket.resident}
                       className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                     />
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium mb-2 block">Telefone</label>
-                    <input 
+                    <input
                       type="text"
                       defaultValue={selectedTicket.residentPhone}
                       className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
@@ -1466,18 +1467,18 @@ export default function TicketsPage() {
                   </div>
                   <div>
                     <label className="text-sm font-medium mb-2 block">Email</label>
-                    <input 
+                    <input
                       type="email"
                       defaultValue={selectedTicket.residentEmail}
                       className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                     />
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium mb-2 block">Responsável</label>
-                    <input 
+                    <input
                       type="text"
                       defaultValue={selectedTicket.assignedTo || ""}
                       className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
@@ -1485,7 +1486,7 @@ export default function TicketsPage() {
                   </div>
                   <div>
                     <label className="text-sm font-medium mb-2 block">Custo Estimado</label>
-                    <input 
+                    <input
                       type="number"
                       step="0.01"
                       defaultValue={selectedTicket.cost}
@@ -1493,17 +1494,17 @@ export default function TicketsPage() {
                     />
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="text-sm font-medium mb-2 block">Previsão de Conclusão</label>
-                  <input 
+                  <input
                     type="date"
                     defaultValue={selectedTicket.estimatedCompletion || ""}
                     className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                   />
                 </div>
               </form>
-              
+
               <div className="flex justify-end space-x-2 mt-6">
                 <Button variant="outline" onClick={closeModals}>
                   Cancelar
